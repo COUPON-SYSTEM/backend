@@ -28,6 +28,7 @@ dependencies {
 	implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	runtimeOnly 'com.mysql:mysql-connector-j'
 }
 
 tasks.named('test') {
