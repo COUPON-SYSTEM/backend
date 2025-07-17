@@ -30,7 +30,7 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.ACKS_CONFIG, "all");  // 안정성 향상 (메세지 전송 확인 수준 설정)
         props.put(ProducerConfig.RETRIES_CONFIG, 10);  // 실패 시 재시도 횟수 설정
         props.put(ProducerConfig.LINGER_MS_CONFIG, 1); //  "얼마나 기다렸다가" 배치로 전송할지를 결정하는 지연 시간(ms 단위)
-        props.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "tx-producer-1");
+//        props.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "tx-producer-1");
 
 
         return new DefaultKafkaProducerFactory<>(props);
