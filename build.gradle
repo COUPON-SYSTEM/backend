@@ -27,8 +27,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
 
-	// Kafka
-	implementation 'org.springframework.kafka:spring-kafka:2.9.2'
 
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
@@ -43,8 +41,13 @@ dependencies {
 	testAnnotationProcessor 'org.projectlombok:lombok'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
+
+	// Kafka
+
+	implementation 'org.springframework.kafka:spring-kafka:3.3.7'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
