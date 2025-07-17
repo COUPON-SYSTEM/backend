@@ -9,6 +9,6 @@ import org.springframework.stereotype.Component;
 public class CustomKafkaConsumer {
     @KafkaListener(topics = "test-topic", groupId = "consumer-group1")
     public void handleMessage(String message) {
-        System.out.println("Received message: " + message);
+        log.info("Received message: {}", message);
     }
 }
