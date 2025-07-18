@@ -1,17 +1,21 @@
 package com.company.demo.giftcoupon.queue;
 
+import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import com.company.demo.giftcoupon.event.GiftRequestEvent;
 
 // 요청을 Redis에서 10개씩 뽑아오는 Component
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class GiftRequestRedisQueue {
 
      private final RedisTemplate<String, String> redisTemplate;
-     private final GiftRequestProducer giftRequestProducer;
+     private final CustomKafkaProducer customKafkaProducer;
 
     // Redis 리스트(queue)의 키 – 사용자 요청들이 쌓이는 큐의 이름
     private static final String COUPON_QUEUE_KEY = "coupon:request:queue";
@@ -28,7 +32,8 @@ public class GiftRequestRedisQueue {
 
             // Kafka로 메시지 전송
             GiftRequestEvent event = new GiftRequestEvent(userId);
-            giftRequestProducer.send(event);
+            customKafkaProducer.sendGiftRequest(event);
+            log.info("Gift request sent: #{}", i);
         }
     }
 }
