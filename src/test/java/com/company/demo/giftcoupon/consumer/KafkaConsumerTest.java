@@ -2,6 +2,7 @@ package com.company.demo.giftcoupon.consumer;
 
 import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ public class KafkaConsumerTest {
     }
 
     @Test
+    @DisplayName("프로듀서가 보낸 메시지 1개 수신")
     void testConsumerLogsMessage(CapturedOutput output) throws InterruptedException {
 
         // 메시지 처리 시간 기다리기
