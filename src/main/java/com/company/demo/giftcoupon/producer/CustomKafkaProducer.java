@@ -1,5 +1,7 @@
 package com.company.demo.giftcoupon.producer;
 
+import com.company.demo.common.constant.KafkaTopic;
+import com.company.demo.giftcoupon.event.GiftRequestEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -29,4 +31,16 @@ public class CustomKafkaProducer {
 //        }));
     }
 
+    public void sendGiftRequest(GiftRequestEvent event) {
+        kafkaTemplate.send(KafkaTopic.GIFT_REQUEST, event);
+    }
+/*
+    public void sendOrderEvent(OrderEvent event) {
+        kafkaTemplate.send("order-topic", event);
+    }
+
+    public void sendErrorLog(ErrorEvent event) {
+        kafkaTemplate.send("error-log-topic", event);
+    }
+*/
 }
