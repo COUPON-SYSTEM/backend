@@ -18,9 +18,6 @@ public class CouponIssueController {
 
     private final GiftRequestRedisQueue giftRequestRedisQueue;
 
-    private static final String COUPON_QUEUE_KEY = "coupon:queue";
-    private static final String COUPON_ISSUED_SET_KEY = "coupon:issued";
-
     @PostMapping("/request")
     public ResponseEntity<String> issueCoupon(@RequestBody CouponIssueRequest request) {
         String userId = request.getUserId();
