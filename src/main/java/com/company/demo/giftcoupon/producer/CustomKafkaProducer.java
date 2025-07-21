@@ -16,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 public class CustomKafkaProducer {
     // KafkaTemplate Bean을 주입해 MyKafkaProducer 객체 생성
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, GiftRequestEvent> giftKafkaTemplate;
 
     public void sendMessage(String topic, String message) {
         kafkaTemplate.send(topic, message);
@@ -31,8 +32,8 @@ public class CustomKafkaProducer {
 //        }));
     }
 
-    public void sendGiftRequest(GiftRequestEvent event) {
-        kafkaTemplate.send(KafkaTopic.GIFT_REQUEST, event);
+    public void sendRequestMessage(GiftRequestEvent event) {
+        giftKafkaTemplate.send(KafkaTopic.GIFT_REQUEST, event);
     }
 /*
     public void sendOrderEvent(OrderEvent event) {

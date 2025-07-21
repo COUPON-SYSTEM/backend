@@ -32,7 +32,7 @@ public class GiftRequestRedisQueue {
 
             // Kafka로 메시지 전송
             GiftRequestEvent event = new GiftRequestEvent(userId);
-            customKafkaProducer.sendGiftRequest(event);
+            customKafkaProducer.sendRequestMessage(event);
             log.info("Gift request sent: #{}", i);
         }
     }
