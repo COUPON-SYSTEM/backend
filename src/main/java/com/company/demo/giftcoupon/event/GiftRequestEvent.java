@@ -1,13 +1,11 @@
 package com.company.demo.giftcoupon.event;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
 public class GiftRequestEvent {
     private String userId;
 }
