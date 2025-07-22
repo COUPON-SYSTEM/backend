@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.company.demo.giftcoupon.domain.repository.CouponRepository;
 
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -19,11 +20,15 @@ public class CouponIssueService {
 
     @Transactional
     public CouponIssueResponse issueCoupon(CouponIssueRequest request) {
-        customKafkaProducer.sendMessage(ISSUE_TOPIC, request);
         Coupon coupon = Coupon.codeOnlyBuilder()
                 .code("메롱")
                 .build();
         couponRepository.save(coupon);
+        log.info("쿠폰 DB에 저장 완료");
         return CouponIssueResponse.of(coupon);
+
+        // 2. Kafka에 "발급 완료" 메시지 발행
+        //CouponIssuedEvent event = new CouponIssuedEvent(userId, ...);
+        // kafkaTemplate.send("coupon-issued-topic", event);
     }
 }
