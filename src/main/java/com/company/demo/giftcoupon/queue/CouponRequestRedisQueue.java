@@ -6,13 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import com.company.demo.giftcoupon.event.GiftRequestEvent;
+import com.company.demo.giftcoupon.event.CouponRequestEvent;
 
 // 요청을 Redis에서 10개씩 뽑아오는 Component
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class GiftRequestRedisQueue {
+public class CouponRequestRedisQueue {
 
      private final RedisTemplate<String, String> redisTemplate;
      private final CustomKafkaProducer customKafkaProducer;
@@ -31,7 +31,7 @@ public class GiftRequestRedisQueue {
             if (userId == null) break;
 
             // Kafka로 메시지 전송
-            GiftRequestEvent event = new GiftRequestEvent(userId);
+            CouponRequestEvent event = new CouponRequestEvent(userId);
             customKafkaProducer.sendRequestMessage(event);
             log.info("Gift request sent: #{}", i);
         }

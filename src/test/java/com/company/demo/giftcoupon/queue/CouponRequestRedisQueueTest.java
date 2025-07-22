@@ -10,13 +10,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
-class GiftRequestRedisQueueTest {
+class CouponRequestRedisQueueTest {
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
     @Autowired
-    private GiftRequestRedisQueue giftRequestRedisQueue;
+    private CouponRequestRedisQueue couponRequestRedisQueue;
 
     private static final String COUPON_QUEUE_KEY = "coupon:queue"; // 큐에 들어갈 쿠폰
 
@@ -37,7 +37,7 @@ class GiftRequestRedisQueueTest {
         assertThat(initialSize).isEqualTo(10);
 
         // When: GiftIssueWorker가 큐를 처리
-        giftRequestRedisQueue.popFromQueueAndSendToKafka();
+        couponRequestRedisQueue.popFromQueueAndSendToKafka();
 
         // Then: Redis 큐에는 더 이상 데이터가 없어야 함
         Long remainingSize = redisTemplate.opsForList().size(COUPON_QUEUE_KEY);
