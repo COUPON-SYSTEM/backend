@@ -1,14 +1,11 @@
 package com.company.demo.giftcoupon.producer;
 
 import com.company.demo.common.constant.KafkaTopic;
-import com.company.demo.giftcoupon.event.GiftRequestEvent;
+import com.company.demo.giftcoupon.event.CouponRequestEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
-
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -16,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 public class CustomKafkaProducer {
     // KafkaTemplate Bean을 주입해 MyKafkaProducer 객체 생성
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final KafkaTemplate<String, GiftRequestEvent> giftKafkaTemplate;
+    private final KafkaTemplate<String, CouponRequestEvent> giftKafkaTemplate;
 
     public void sendMessage(String topic, String message) {
         kafkaTemplate.send(topic, message);
@@ -32,7 +29,7 @@ public class CustomKafkaProducer {
 //        }));
     }
 
-    public void sendRequestMessage(GiftRequestEvent event) {
+    public void sendRequestMessage(CouponRequestEvent event) {
         giftKafkaTemplate.send(KafkaTopic.GIFT_REQUEST, event);
     }
 /*

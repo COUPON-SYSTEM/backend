@@ -6,6 +6,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
-public class GiftRequestEvent {
+public class CouponRequestEvent {
     private String userId;
 }

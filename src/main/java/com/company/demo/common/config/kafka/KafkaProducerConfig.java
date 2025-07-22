@@ -10,7 +10,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.kafka.core.ProducerFactory;
-import com.company.demo.giftcoupon.event.GiftRequestEvent;
+import com.company.demo.giftcoupon.event.CouponRequestEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,8 +47,8 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, GiftRequestEvent> giftKafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory(GiftRequestEvent.class));
+    public KafkaTemplate<String, CouponRequestEvent> giftKafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory(CouponRequestEvent.class));
     }
 
 //    @Bean
