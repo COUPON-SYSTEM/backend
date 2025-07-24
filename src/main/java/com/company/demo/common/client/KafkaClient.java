@@ -3,13 +3,16 @@ package com.company.demo.common.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.errors.TopicExistsException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -18,8 +21,10 @@ public class KafkaClient {
 
     private final AdminClient adminClient;
 
-    public KafkaClient(KafkaStreamsConfiguration kafkaStreamsConfiguration) {
-        this.adminClient = AdminClient.create(kafkaStreamsConfiguration.asProperties());
+    public KafkaClient(@Value("${kafka.bootstrap-servers:localhost:9092}") String bootstrapServers) {
+        Properties props = new Properties();
+        props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        this.adminClient = AdminClient.create(props);
     }
 
     public void createTopicIfNotExists(String topicName, int partitions, short replicationFactor) {
