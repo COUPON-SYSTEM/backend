@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.company.demo.common.constant.RedisKey.COUPON_REQUEST_COUNT_KEY;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -33,7 +35,6 @@ public class CouponRequestPublisher {
     """;
 
     // Redis에서 누적 발급 수를 저장하는 키
-    private static final String ISSUED_COUNT_KEY = "coupon:issued:count";
 
     private static final long MAX_TOTAL = 100;
 
@@ -42,7 +43,7 @@ public class CouponRequestPublisher {
     public void issueCoupons() {
         // 현재까지 발급된 수 조회
         Long issuedCount = Long.parseLong(redisTemplate.opsForValue()
-                .getOrDefault(ISSUED_COUNT_KEY, "0"));
+                .getOrDefault(COUPON_REQUEST_COUNT_KEY, "0"));
 
         // 발급 수가 이미 한계치를 넘었다면 중단
         if (issuedCount >= MAX_TOTAL) {
@@ -76,7 +77,7 @@ public class CouponRequestPublisher {
         repository.saveAll(issued);
 
         // Redis에 누적 발급 수 업데이트
-        redisTemplate.opsForValue().increment(ISSUED_COUNT_KEY, issued.size());
+        redisTemplate.opsForValue().increment(COUPON_REQUEST_COUNT_KEY, issued.size());
 
         log.info("✅ {}명 발급 완료 (누적 {})", issued.size(), issuedCount + issued.size());
     }
