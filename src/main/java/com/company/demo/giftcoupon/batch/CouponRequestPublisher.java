@@ -32,20 +32,25 @@ public class CouponRequestPublisher {
         return items
     """;
 
+    // Redis에서 누적 발급 수를 저장하는 키
     private static final String ISSUED_COUNT_KEY = "coupon:issued:count";
-    private static final long MAX_COUPON_LIMIT = 100L;
 
+    private static final long MAX_TOTAL = 100;
+
+    // 3초마다 실행
     @Scheduled(fixedDelay = 3000)
-    public void publishBatchToKafka() {
-        Long currentCount = redisTemplate.opsForValue().get(ISSUED_COUNT_KEY) != null
-                ? Long.parseLong(redisTemplate.opsForValue().get(ISSUED_COUNT_KEY))
-                : 0L;
+    public void issueCoupons() {
+        // 현재까지 발급된 수 조회
+        Long issuedCount = Long.parseLong(redisTemplate.opsForValue()
+                .getOrDefault(ISSUED_COUNT_KEY, "0"));
 
-        if (currentCount >= MAX_COUPON_LIMIT) {
-            log.info("쿠폰 발급 마감 (누적 {}명)", currentCount);
+        // 발급 수가 이미 한계치를 넘었다면 중단
+        if (issuedCount >= MAX_TOTAL) {
+            log.info("쿠폰 발급 종료됨");
             return;
         }
 
+        // Redis 큐에서 최대 10명 꺼내기
         List<String> users = redisTemplate.execute(
                 new DefaultRedisScript<>(LUA_POP_10, List.class),
                 Collections.singletonList("coupon:queue")
@@ -53,25 +58,26 @@ public class CouponRequestPublisher {
 
         if (users == null || users.isEmpty()) return;
 
-        // 남은 쿠폰 수만큼만 처리
-        long available = MAX_COUPON_LIMIT - currentCount;
-        if (users.size() > available) {
-            users = users.subList(0, (int) available);
+        // 남은 수량보다 많이 꺼낸 경우 잘라냄 (예: 95명 발급된 상태에서 10명 꺼내면 → 5명만 처리)
+        long limit = MAX_TOTAL - issuedCount;
+        if (users.size() > limit) {
+            users = users.subList(0, (int) limit);
         }
 
-        List<CouponIssued> issuedList = new ArrayList<>();
-
+        List<CouponIssued> issued = new ArrayList<>();
         for (String userId : users) {
-            CouponRequestEvent event = new CouponRequestEvent(userId);
-            kafkaTemplate.send("coupon-topic", event);
-            issuedList.add(new CouponIssued(userId, LocalDateTime.now()));
+            // Kafka 발행
+            kafkaTemplate.send("coupon-topic", new CouponIssuedEvent(userId));
+            // DB 저장용 객체 생성
+            issued.add(new CouponIssued(userId, LocalDateTime.now()));
         }
 
-        couponIssuedRepository.saveAll(issuedList);
+        // DB에 저장
+        repository.saveAll(issued);
 
-        // 카운터 증가
-        redisTemplate.opsForValue().increment(ISSUED_COUNT_KEY, users.size());
+        // Redis에 누적 발급 수 업데이트
+        redisTemplate.opsForValue().increment(ISSUED_COUNT_KEY, issued.size());
 
-        log.info("Kafka 발행 완료: {}명, 누적 발급 수: {}", users.size(), currentCount + users.size());
+        log.info("✅ {}명 발급 완료 (누적 {})", issued.size(), issuedCount + issued.size());
     }
 }

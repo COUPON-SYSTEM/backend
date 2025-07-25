@@ -1,7 +1,6 @@
 package com.company.demo.giftcoupon.consumer;
 
 import com.company.demo.common.constant.KafkaTopic;
-import com.company.demo.giftcoupon.domain.repository.CouponRepository;
 import com.company.demo.giftcoupon.mapper.dto.request.CouponIssueRequest;
 import com.company.demo.giftcoupon.sevice.CouponIssueService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,7 @@ public class CustomKafkaConsumer {
         log.info("Received message: {}", message);
     }
 
-    @KafkaListener(topics = KafkaTopic.GIFT_REQUEST)
+    @KafkaListener(topics = KafkaTopic.COUPON_REQUEST)
     public void handleCouponRequest(CouponIssueRequest request) {
         couponIssueService.issueCoupon(request);
     }
