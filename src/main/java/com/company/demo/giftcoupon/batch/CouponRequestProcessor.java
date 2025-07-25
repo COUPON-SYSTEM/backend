@@ -11,12 +11,10 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CouponRequestProcessor implements ItemProcessor<List<String>, List<CouponRequestEvent>>{
+public class CouponRequestProcessor implements ItemProcessor<String, CouponRequestEvent> {
 
     @Override
-    public List<CouponRequestEvent> process(List<String> userIds) {
-        return userIds.stream()
-                .map(CouponRequestEvent::new)
-                .toList();
+    public CouponRequestEvent process(String userId) {
+        return new CouponRequestEvent(userId);
     }
 }
