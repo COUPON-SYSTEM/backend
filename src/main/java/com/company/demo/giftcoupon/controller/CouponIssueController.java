@@ -19,7 +19,7 @@ public class CouponIssueController {
 
     private final CouponRequestRedisQueue couponRequestRedisQueue;
 
-    @PostMapping("/request-coupon")
+    @PostMapping("/request")
     public ResponseEntity<String> requestCoupon(@RequestParam(value = "userId") String userId) {
         // "coupon:queue" 리스트에 userId를 넣되, 100명 이상이면 실패
         boolean success = couponRequestRedisQueue.tryPush(userId);
