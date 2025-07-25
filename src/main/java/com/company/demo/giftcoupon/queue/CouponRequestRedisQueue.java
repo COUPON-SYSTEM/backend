@@ -11,6 +11,8 @@ import com.company.demo.giftcoupon.event.CouponRequestEvent;
 
 import java.util.Collections;
 
+import static com.company.demo.common.constant.RedisKey.COUPON_REQUEST_QUEUE_KEY;
+
 // 요청을 Redis에서 10개씩 뽑아오는 Component
 @Slf4j
 @Component
@@ -19,9 +21,6 @@ public class CouponRequestRedisQueue {
 
      private final RedisTemplate<String, String> redisTemplate;
      private final CustomKafkaProducer customKafkaProducer;
-
-    // Redis 리스트(queue)의 키 – 사용자 요청들이 쌓이는 큐의 이름
-    private static final String COUPON_QUEUE_KEY = "coupon:request:queue";
 
     private static final String LUA_PUSH_IF_UNDER_100 = """
         local currentLength = redis.call('LLEN', KEYS[1])
@@ -36,7 +35,7 @@ public class CouponRequestRedisQueue {
     public boolean tryPush(String userId) {
         Long result = redisTemplate.execute(
                 new DefaultRedisScript<>(LUA_PUSH_IF_UNDER_100, Long.class),
-                Collections.singletonList("coupon:queue"),
+                Collections.singletonList(COUPON_REQUEST_QUEUE_KEY),
                 "100", userId
         );
         return result != null && result == 1;
