@@ -3,11 +3,14 @@ package com.company.demo.giftcoupon.controller;
 import com.company.demo.giftcoupon.mapper.dto.request.CouponIssueRequest;
 import com.company.demo.giftcoupon.queue.CouponRequestRedisQueue;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+
+import static org.springframework.http.ResponseEntity.ok;
+import static org.springframework.http.ResponseEntity.status;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,10 +19,10 @@ public class CouponIssueController {
 
     private final CouponRequestRedisQueue couponRequestRedisQueue;
 
-    @PostMapping("/request")
-    public ResponseEntity<String> issueCoupon(@RequestBody CouponIssueRequest request) {
-        String userId = request.getUserId();
-        couponRequestRedisQueue.popFromQueueAndSendToKafka();
-        return ResponseEntity.ok("쿠폰 발급 요청이 접수되었습니다.");
+    @PostMapping("/request-coupon")
+    public ResponseEntity<String> requestCoupon(@RequestParam(value = "userId") String userId) {
+        // "coupon:queue" 리스트에 userId를 넣되, 100명 이상이면 실패
+        boolean success = couponRequestRedisQueue.tryPush(userId);
+        return success ? ok("신청 완료") : status(429).body("마감됨");
     }
 }

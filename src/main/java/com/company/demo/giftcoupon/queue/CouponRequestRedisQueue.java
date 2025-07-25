@@ -4,9 +4,12 @@ import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import com.company.demo.giftcoupon.event.CouponRequestEvent;
+
+import java.util.Collections;
 
 // 요청을 Redis에서 10개씩 뽑아오는 Component
 @Slf4j
@@ -20,7 +23,26 @@ public class CouponRequestRedisQueue {
     // Redis 리스트(queue)의 키 – 사용자 요청들이 쌓이는 큐의 이름
     private static final String COUPON_QUEUE_KEY = "coupon:request:queue";
 
-    // Redis 큐에서 최대 10개의 요청을 꺼내 처리
+    private static final String LUA_PUSH_IF_UNDER_100 = """
+        local currentLength = redis.call('LLEN', KEYS[1])
+        if tonumber(currentLength) < tonumber(ARGV[1]) then
+            redis.call('RPUSH', KEYS[1], ARGV[2])
+            return 1
+        else
+            return 0
+        end
+    """;
+
+    public boolean tryPush(String userId) {
+        Long result = redisTemplate.execute(
+                new DefaultRedisScript<>(LUA_PUSH_IF_UNDER_100, Long.class),
+                Collections.singletonList("coupon:queue"),
+                "100", userId
+        );
+        return result != null && result == 1;
+    }
+
+    /* Redis 큐에서 최대 10개의 요청을 꺼내 처리
     @Scheduled(fixedDelay = 1000) // 1초 간격으로 반복 실행
     public void popFromQueueAndSendToKafka() {
         for (int i = 0; i < 10; i++) {
@@ -35,5 +57,5 @@ public class CouponRequestRedisQueue {
             customKafkaProducer.sendRequestMessage(event);
             log.info("Gift request sent: #{}", i);
         }
-    }
+    }*/
 }

@@ -46,7 +46,7 @@ public class KafkaProducerTest {
     @DisplayName("쿠폰 요청 메시지 보내기")
     void testSendGiftRequestMessage() {
         // Given
-        String topic = KafkaTopic.GIFT_REQUEST;
+        String topic = KafkaTopic.COUPON_REQUEST;
         CouponRequestEvent event = CouponRequestEvent.builder()
                 .userId("1")
                 .build();
