@@ -5,6 +5,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.batch.core.Job;
+import com.company.demo.giftcoupon.batch.RedisCouponReader;
 
 @Configuration
 @RequiredArgsConstructor
