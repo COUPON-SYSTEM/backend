@@ -11,7 +11,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class RedisCouponReader implements ItemReader<List<String>> {
+public class RedisCouponReader implements ItemReader<String> {
 
     private final RedisTemplate<String, String> redisTemplate;
 
@@ -24,7 +24,7 @@ public class RedisCouponReader implements ItemReader<List<String>> {
     """;
 
     @Override
-    public List<String> read() {
+    public String read() {
         List<String> users = redisTemplate.execute(
                 new DefaultRedisScript<>(LUA_POP_10, List.class),
                 Collections.singletonList("coupon:queue")
