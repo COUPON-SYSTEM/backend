@@ -1,6 +1,5 @@
 package com.company.demo.giftcoupon.batch;
 
-import com.company.demo.common.constant.KafkaTopic;
 import com.company.demo.common.constant.RedisKey;
 import com.company.demo.giftcoupon.event.CouponRequestEvent;
 import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
@@ -9,8 +8,6 @@ import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
