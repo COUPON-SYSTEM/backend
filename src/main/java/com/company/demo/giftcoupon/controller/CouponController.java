@@ -1,13 +1,9 @@
 package com.company.demo.giftcoupon.controller;
 
-import com.company.demo.giftcoupon.mapper.dto.request.CouponIssueRequest;
 import com.company.demo.giftcoupon.queue.CouponRequestRedisQueue;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
 
 import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.http.ResponseEntity.status;
@@ -15,7 +11,7 @@ import static org.springframework.http.ResponseEntity.status;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/coupons")
-public class CouponIssueController {
+public class CouponController {
 
     private final CouponRequestRedisQueue couponRequestRedisQueue;
 
