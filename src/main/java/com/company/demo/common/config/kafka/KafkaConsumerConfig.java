@@ -9,6 +9,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import com.company.demo.giftcoupon.event.CouponRequestEvent;
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import io.lettucconfluent.kafka.serializers.KafkaAvroDeserializer;
+import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
+import org.apache.avro.specific.SpecificRecord;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,27 +30,53 @@ public class KafkaConsumerConfig {
 
     //private final KafkaErrorHandler kafkaErrorHandler;
 
-    @Bean
-    public ConsumerFactory<String, String> consumerFactory() {
+//    public <T> ConsumerFactory<String, T> consumerFactory(Class<T> clazz) {
+//        JsonDeserializer<T> deserializer = new JsonDeserializer<>(clazz);
+//        deserializer.addTrustedPackages("*");
+//
+//        Map<String, Object> props = new HashMap<>();
+//        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+//        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+//        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+//        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+//        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+//
+//        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+//    }
+//
+//    @Bean
+//    public ConcurrentKafkaListenerContainerFactory<String, CouponRequestEvent> couponRequestEventListenerFactory() {
+//        ConcurrentKafkaListenerContainerFactory<String, CouponRequestEvent> factory =
+//                new ConcurrentKafkaListenerContainerFactory<>();
+//        factory.setConsumerFactory(consumerFactory(CouponRequestEvent.class));
+//        return factory;
+//    }
+
+    public <T extends SpecificRecord> ConsumerFactory<String, T> avroConsumerFactory(Class<T> clazz) {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"); // 또는 "latest"
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100); // batch 크기 제한
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false); // 수동 커밋 선호 시
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        return new DefaultKafkaConsumerFactory<>(props);
+        // Schema Registry 주소
+        props.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, "http://localhost:8081");
+
+        // Avro 클래스로 deserialize 하려면 필수!
+        props.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true);
+
+        KafkaAvroDeserializer deserializer = new KafkaAvroDeserializer();
+        deserializer.configure(props, false); // false → value deserializer
+
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
     }
 
-    // 이 Bean이 있어야 @KafkaListener가 동작함
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory =
+    public ConcurrentKafkaListenerContainerFactory<String, CouponRequestEvent> couponRequestEventListenerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, CouponRequestEvent> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
-        //factory.setCommonErrorHandler(kafkaErrorHandler);
+        factory.setConsumerFactory(avroConsumerFactory(CouponRequestEvent.class));
         return factory;
     }
 }
