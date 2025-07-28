@@ -1,17 +1,16 @@
 package com.company.demo.giftcoupon.queue;
 
+import com.company.demo.common.constant.RedisKey;
 import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import com.company.demo.giftcoupon.event.CouponRequestEvent;
 
 import java.util.Collections;
-
-import static com.company.demo.common.constant.RedisKey.COUPON_REQUEST_QUEUE_KEY;
 
 // 요청을 Redis에서 10개씩 뽑아오는 Component
 @Slf4j
@@ -19,42 +18,29 @@ import static com.company.demo.common.constant.RedisKey.COUPON_REQUEST_QUEUE_KEY
 @RequiredArgsConstructor
 public class CouponRequestRedisQueue {
 
-     private final RedisTemplate<String, String> redisTemplate;
-     private final CustomKafkaProducer customKafkaProducer;
+    private final RedisTemplate<String, String> redisTemplate;
+    private static final int MAX_QUEUE_SIZE = 100;
+    private static final String LUA_SCRIPT_PATH = "scripts/push_if_under_limit.lua";
+    private DefaultRedisScript<Long> pushIfUnderLimitScript;
 
-    private static final String LUA_PUSH_IF_UNDER_100 = """
-        local currentLength = redis.call('LLEN', KEYS[1])
-        if tonumber(currentLength) < tonumber(ARGV[1]) then
-            redis.call('RPUSH', KEYS[1], ARGV[2])
-            return 1
-        else
-            return 0
-        end
-    """;
-
-    public boolean tryPush(String userId) {
-        Long result = redisTemplate.execute(
-                new DefaultRedisScript<>(LUA_PUSH_IF_UNDER_100, Long.class),
-                Collections.singletonList(COUPON_REQUEST_QUEUE_KEY),
-                "100", userId
-        );
-        return result != null && result == 1;
+    @PostConstruct
+    public void initScript() {
+        pushIfUnderLimitScript = new DefaultRedisScript<>();
+        pushIfUnderLimitScript.setLocation(new ClassPathResource(LUA_SCRIPT_PATH));
+        pushIfUnderLimitScript.setResultType(Long.class);
     }
 
-    /* Redis 큐에서 최대 10개의 요청을 꺼내 처리
-    @Scheduled(fixedDelay = 1000) // 1초 간격으로 반복 실행
-    public void popFromQueueAndSendToKafka() {
-        for (int i = 0; i < 10; i++) {
-            // Redis 큐(List)에서 데이터를 하나 꺼냄 (오른쪽 Pop)
-            String userId = redisTemplate.opsForList().rightPop(COUPON_QUEUE_KEY);
-
-            // 큐가 비어있으면 루프 중단
-            if (userId == null) break;
-
-            // Kafka로 메시지 전송
-            CouponRequestEvent event = new CouponRequestEvent(userId);
-            customKafkaProducer.sendRequestMessage(event);
-            log.info("Gift request sent: #{}", i);
-        }
-    }*/
+    /**
+     * 큐의 크기가 MAX_QUEUE_SIZE 미만이면 userId를 push
+     * @param userId 유저 아이디
+     * @return 성공 여부
+     */
+    public boolean tryPush(String userId) {
+        Long result = redisTemplate.execute(
+                pushIfUnderLimitScript,
+                Collections.singletonList(RedisKey.COUPON_REQUEST_QUEUE_KEY),
+                String.valueOf(MAX_QUEUE_SIZE), userId
+        );
+        return Long.valueOf(1).equals(result);
+    }
 }

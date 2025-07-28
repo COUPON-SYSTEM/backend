@@ -46,6 +46,8 @@ dependencies {
 	// Kafka
 
 	implementation 'org.springframework.kafka:spring-kafka:3.3.7'
+	implementation 'org.apache.avro:avro:1.11.1'
+	implementation 'io.confluent:kafka-avro-serializer:7.5.0'
 
 	// batch
 	implementation 'org.springframework.boot:spring-boot-starter-batch'
