@@ -28,8 +28,8 @@ public class KafkaConsumerConfig {
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
 
-    @Value("${spring.kafka.properties.schema.registry.url}")
-    private String schemaRegistryUrl;
+    //x@Value("${spring.kafka.properties.schema.registry.url}")
+    // private String schemaRegistryUrl;
 
     // private final KafkaErrorHandler kafkaErrorHandler;
 
