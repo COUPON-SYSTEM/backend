@@ -18,15 +18,6 @@ public class CustomKafkaProducer {
     public void sendMessage(String topic, String message) {
         kafkaTemplate.send(topic, message);
         log.info("Message sent to topic " + topic + " : " + message);
-//        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, message);
-//        future.whenComplete(((stringStringSendResult, throwable) -> {
-//            if(throwable == null) {
-//                log.info("sendMessage success, message : {}", message);
-//            }
-//            else {
-//                log.info("sendMessage failed");
-//            }
-//        }));
     }
 
     public void sendRequestMessage(CouponRequestEvent event) {
