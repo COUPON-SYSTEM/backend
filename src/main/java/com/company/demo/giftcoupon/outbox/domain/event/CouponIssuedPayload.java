@@ -1,4 +1,4 @@
-package com.company.demo.giftcoupon.outbox.event;
+package com.company.demo.giftcoupon.outbox.domain.event;
 
 import java.time.LocalDateTime;
 
