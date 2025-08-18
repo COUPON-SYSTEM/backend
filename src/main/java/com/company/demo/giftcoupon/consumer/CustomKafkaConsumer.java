@@ -1,12 +1,14 @@
 package com.company.demo.giftcoupon.consumer;
 
+import com.company.demo.common.constant.KafkaTopic;
 import com.company.demo.giftcoupon.mapper.dto.request.CouponIssuanceRequestDto;
 import com.company.demo.giftcoupon.sevice.CouponIssueService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -20,21 +22,19 @@ public class CustomKafkaConsumer {
         log.info("Received message: {}", message);
     }
 
-    @Transactional
-    public void tryToIssuanceCoupon(final CouponIssuanceRequestDto issuance) {
+    @KafkaListener(topics = KafkaTopic.COUPON_ISSUANCE)
+    public void handleIssuanceMessage(String messageJson) throws JsonProcessingException {
+        // 1. 메시지 역직렬화 (예: ObjectMapper 사용)
+        CouponIssuanceRequestDto dto = new ObjectMapper().readValue(messageJson, CouponIssuanceRequestDto.class);
 
-        // 1. 선착순 쿠폰 발급 시도
-        CouponIssuanceResult result = timeAttackCouponIssuer.tryIssuance(issuance);
+        // 2. DTO -> Command 변환
+        TryIssueCouponCommand command = TryIssueCouponCommand.builder()
+                .memberId(dto.getMemberId())
+                .couponId(dto.getCouponId())
+                .requestId(dto.getRequestId())
+                .build();
 
-        // 2. Spring Event 발행
-        if (result.isSuccess()) {
-            DomainEventEnvelop envelop = result.toEvent();
-            applicationEventPublisher.publish(envelop);
-        }
+        // 3. 서비스 호출
+        couponIssueService.tryToIssueCoupon(command);
     }
-
-//    @KafkaListener(topics = KafkaTopic.COUPON_ISSUANCE)
-//    public void handleCouponRequest(CouponIssueRequestDto request) {
-//        couponIssueService.issueCoupon(request);
-//    }
 }
