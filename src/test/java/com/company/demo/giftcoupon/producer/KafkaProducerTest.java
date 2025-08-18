@@ -1,7 +1,7 @@
 package com.company.demo.giftcoupon.producer;
 
 import com.company.demo.common.constant.KafkaTopic;
-import com.company.demo.giftcoupon.event.CouponRequestEvent;
+import com.company.demo.giftcoupon.event.CouponIssuanceEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -20,13 +20,13 @@ public class KafkaProducerTest {
     private KafkaTemplate<String, String> kafkaTemplate;
 
     @Mock
-    private KafkaTemplate<String, CouponRequestEvent> giftKafkaTemplate;
+    private KafkaTemplate<String, CouponIssuanceEvent> giftKafkaTemplate;
 
     @InjectMocks
     private CustomKafkaProducer kafkaProducer;
 
     @Captor
-    private ArgumentCaptor<CouponRequestEvent> eventCaptor;
+    private ArgumentCaptor<CouponIssuanceEvent> eventCaptor;
 
     @Test
     @DisplayName("테스트 토픽으로 메시지 보내기")
@@ -47,7 +47,7 @@ public class KafkaProducerTest {
     void testSendGiftRequestMessage() {
         // Given
         String topic = KafkaTopic.COUPON_ISSUANCE;
-        CouponRequestEvent event = CouponRequestEvent.builder()
+        CouponIssuanceEvent event = CouponIssuanceEvent.builder()
                 .userId("1")
                 .build();
 
@@ -57,7 +57,7 @@ public class KafkaProducerTest {
         // Then
         verify(giftKafkaTemplate, times(1)).send(eq(topic), eventCaptor.capture());
 
-        CouponRequestEvent captured = eventCaptor.getValue();
+        CouponIssuanceEvent captured = eventCaptor.getValue();
         assertEquals(event.getUserId(), captured.getUserId()); // JSON으로 직렬화되더라도 객체 내용 비교 가능
     }
 }
