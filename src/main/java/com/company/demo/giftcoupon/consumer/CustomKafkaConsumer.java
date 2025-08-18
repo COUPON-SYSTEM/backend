@@ -1,5 +1,6 @@
 package com.company.demo.giftcoupon.consumer;
 
+import com.company.demo.giftcoupon.mapper.dto.request.CouponIssuanceRequestDto;
 import com.company.demo.giftcoupon.sevice.CouponIssueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ public class CustomKafkaConsumer {
     }
 
     @Transactional
-    public void tryToIssuanceCoupon(final TimeAttackCouponIssuance issuance) {
+    public void tryToIssuanceCoupon(final CouponIssuanceRequestDto issuance) {
 
         // 1. 선착순 쿠폰 발급 시도
         CouponIssuanceResult result = timeAttackCouponIssuer.tryIssuance(issuance);
