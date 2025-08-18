@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import com.company.demo.giftcoupon.outbox.domain.entity.CouponIssuanceOutbox;
 import com.company.demo.giftcoupon.outbox.domain.repository.CouponIssuanceOutboxRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 
