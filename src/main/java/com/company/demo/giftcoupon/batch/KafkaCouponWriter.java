@@ -1,7 +1,7 @@
 package com.company.demo.giftcoupon.batch;
 
 import com.company.demo.common.constant.RedisKey;
-import com.company.demo.giftcoupon.event.CouponRequestEvent;
+import com.company.demo.giftcoupon.event.CouponIssuanceEvent;
 import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.Chunk;
@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class KafkaCouponWriter implements ItemWriter<CouponRequestEvent> {
+public class KafkaCouponWriter implements ItemWriter<CouponIssuanceEvent> {
 
     private final CustomKafkaProducer kafkaProducer;
     private final RedisTemplate<String, String> redisTemplate;
 
     @Override
-    public void write(Chunk<? extends CouponRequestEvent> items) {
-        for (CouponRequestEvent event : items) {
+    public void write(Chunk<? extends CouponIssuanceEvent> items) {
+        for (CouponIssuanceEvent event : items) {
             kafkaProducer.sendRequestMessage(event);
         }
 
