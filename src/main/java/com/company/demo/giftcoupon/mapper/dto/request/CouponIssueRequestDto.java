@@ -6,6 +6,6 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
-public class CouponIssueRequest {
+public class CouponIssueRequestDto {
     private String userId;
 }

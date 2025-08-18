@@ -7,11 +7,11 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class CouponIssueResponse {
+public class CouponIssueResponseDto {
     private String code;
 
-    public static CouponIssueResponse of(Coupon coupon) {
-        return CouponIssueResponse.builder()
+    public static CouponIssueResponseDto of(Coupon coupon) {
+        return CouponIssueResponseDto.builder()
                         .code(coupon.getCode())
                                 .build();
     }

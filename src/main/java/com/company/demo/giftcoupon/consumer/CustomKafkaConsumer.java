@@ -1,7 +1,5 @@
 package com.company.demo.giftcoupon.consumer;
 
-import com.company.demo.common.constant.KafkaTopic;
-import com.company.demo.giftcoupon.mapper.dto.request.CouponIssueRequest;
 import com.company.demo.giftcoupon.sevice.CouponIssueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +33,7 @@ public class CustomKafkaConsumer {
     }
 
 //    @KafkaListener(topics = KafkaTopic.COUPON_ISSUANCE)
-//    public void handleCouponRequest(CouponIssueRequest request) {
+//    public void handleCouponRequest(CouponIssueRequestDto request) {
 //        couponIssueService.issueCoupon(request);
 //    }
 }
