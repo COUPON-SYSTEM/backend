@@ -2,6 +2,7 @@ package com.company.demo.common.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import lombok.*;
 import java.time.LocalDateTime;
 
 @ToString(of = "success, data, error")

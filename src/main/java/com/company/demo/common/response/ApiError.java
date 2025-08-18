@@ -1,5 +1,6 @@
 package com.company.demo.common.response;
 
+import lombok.*;
 @Getter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
