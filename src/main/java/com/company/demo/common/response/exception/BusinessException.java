@@ -1,7 +1,9 @@
 package com.company.demo.common.response.exception;
 
 import com.company.demo.common.response.error.ErrorCode;
+import lombok.Getter;
 
+@Getter
 public class BusinessException extends RuntimeException{
     private final ErrorCode errorCode;
 
