@@ -15,12 +15,12 @@ public record CouponIssuanceEvent(
     }
 
     /** 아웃박스 기록을 위한 래핑(Envelope) */
-    public DomainEventEnvelope<CouponIssuedPayload> envelop() {
+    public DomainEventEnvelope<CouponIssuancePayload> envelop() {
         return new DomainEventEnvelope<>(
                 UUID.randomUUID().toString(),      // event_id
                 eventType(),
                 source,
-                new CouponIssuedPayload(memberId, couponId, occurredAt)
+                new CouponIssuancePayload(memberId, couponId, occurredAt)
         );
     }
 }
