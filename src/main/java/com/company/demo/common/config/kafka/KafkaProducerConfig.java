@@ -1,5 +1,6 @@
 package com.company.demo.common.config.kafka;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +24,12 @@ public class KafkaProducerConfig {
     private String BOOTSTRAP_SERVERS;
 
     private static final String SCHEMA_REGISTRY_URL = "http://localhost:8081";
+
+    @PostConstruct
+    public void checkBootstrapServers() {
+        log.info("BOOTSTRAP_SERVERS from config: {}", BOOTSTRAP_SERVERS);
+    }
+
 
     // 동적 생성을 가정하여 설정
     // Kafka 프로듀서 인스턴스(KafkaTemplate)를 생성하는 팩토리 객체

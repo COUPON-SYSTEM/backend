@@ -21,7 +21,7 @@ public class CustomKafkaProducer {
     }
 
     public void sendRequestMessage(CouponRequestEvent event) {
-        giftKafkaTemplate.send(KafkaTopic.COUPON_REQUEST, event);
+        giftKafkaTemplate.send(KafkaTopic.COUPON_ISSUANCE, event);
     }
 /*
     public void sendOrderEvent(OrderEvent event) {
