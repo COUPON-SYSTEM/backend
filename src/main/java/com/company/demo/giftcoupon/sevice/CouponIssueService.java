@@ -23,20 +23,6 @@ public class CouponIssueService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
-    public CouponIssueResponseDto issueCoupon(CouponIssueRequestDto request) {
-        Coupon coupon = Coupon.codeOnlyBuilder()
-                .code("메롱")
-                .build();
-        couponRepository.save(coupon);
-        log.info("쿠폰 DB에 저장 완료");
-        return CouponIssueResponseDto.of(coupon);
-
-        // 2. Kafka에 "발급 완료" 메시지 발행
-        //CouponIssuedEvent event = new CouponIssuedEvent(userId, ...);
-        // kafkaTemplate.send("coupon-issued-topic", event);
-    }
-
-    @Transactional
     public void tryToIssueCoupon(final CouponIssuanceRequestDto requestDto) {
 
         // 1. 선착순 쿠폰 발급 시도(발급 여부 검증)
@@ -48,4 +34,19 @@ public class CouponIssueService {
             applicationEventPublisher.publish(envelop);
         }
     }
+
+
+//    @Transactional
+//    public CouponIssueResponseDto issueCoupon(CouponIssueRequestDto request) {
+//        Coupon coupon = Coupon.codeOnlyBuilder()
+//                .code("메롱")
+//                .build();
+//        couponRepository.save(coupon);
+//        log.info("쿠폰 DB에 저장 완료");
+//        return CouponIssueResponseDto.of(coupon);
+//
+//        // 2. Kafka에 "발급 완료" 메시지 발행
+//        //CouponIssuedEvent event = new CouponIssuedEvent(userId, ...);
+//        // kafkaTemplate.send("coupon-issued-topic", event);
+//    }
 }
