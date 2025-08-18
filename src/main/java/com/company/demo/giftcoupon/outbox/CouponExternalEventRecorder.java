@@ -3,6 +3,8 @@ package com.company.demo.giftcoupon.outbox;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import com.company.demo.giftcoupon.outbox.domain.entity.CouponIssuanceOutbox;
+import com.company.demo.giftcoupon.outbox.domain.repository.CouponIssuanceOutboxRepository;
 
 import java.time.LocalDateTime;
 
