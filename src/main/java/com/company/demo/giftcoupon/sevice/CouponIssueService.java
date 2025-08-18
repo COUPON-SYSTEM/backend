@@ -8,6 +8,7 @@ import com.company.demo.giftcoupon.mapper.dto.response.CouponIssueResponseDto;
 import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,7 @@ public class CouponIssueService {
         // 1. 선착순 쿠폰 발급 시도(발급 여부 검증)
         // CouponIssuanceResult result = timeAttackCouponIssuer.tryIssuance(requestDto);
         CouponIssueResponseDto result = this.issueCoupon(requestDto);
-
+        ApplicationEvent
         // 2. Spring Event 발행
         if (result.isSuccess()) {
             DomainEventEnvelop envelop = result.toEvent();
