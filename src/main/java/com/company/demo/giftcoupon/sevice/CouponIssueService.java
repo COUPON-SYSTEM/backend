@@ -1,11 +1,14 @@
 package com.company.demo.giftcoupon.sevice;
 
 import com.company.demo.giftcoupon.domain.entity.Coupon;
+import com.company.demo.giftcoupon.event.CouponIssuanceEvent;
+import com.company.demo.giftcoupon.mapper.dto.request.CouponIssuanceRequestDto;
 import com.company.demo.giftcoupon.mapper.dto.request.CouponIssueRequestDto;
 import com.company.demo.giftcoupon.mapper.dto.response.CouponIssueResponseDto;
 import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.company.demo.giftcoupon.domain.repository.CouponRepository;
@@ -17,6 +20,7 @@ import com.company.demo.giftcoupon.domain.repository.CouponRepository;
 public class CouponIssueService {
     private final CustomKafkaProducer customKafkaProducer;
     private final CouponRepository couponRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public CouponIssueResponseDto issueCoupon(CouponIssueRequestDto request) {
@@ -30,5 +34,18 @@ public class CouponIssueService {
         // 2. Kafka에 "발급 완료" 메시지 발행
         //CouponIssuedEvent event = new CouponIssuedEvent(userId, ...);
         // kafkaTemplate.send("coupon-issued-topic", event);
+    }
+
+    @Transactional
+    public void tryToIssueCoupon(final CouponIssuanceRequestDto requestDto) {
+
+        // 1. 선착순 쿠폰 발급 시도(발급 여부 검증)
+        CouponIssuanceResult result = timeAttackCouponIssuer.tryIssuance(requestDto);
+
+        // 2. Spring Event 발행
+        if (result.isSuccess()) {
+            DomainEventEnvelop envelop = result.toEvent();
+            applicationEventPublisher.publish(envelop);
+        }
     }
 }
