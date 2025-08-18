@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -20,8 +21,21 @@ public class CustomKafkaConsumer {
         log.info("Received message: {}", message);
     }
 
-    @KafkaListener(topics = KafkaTopic.COUPON_REQUEST)
-    public void handleCouponRequest(CouponIssueRequest request) {
-        couponIssueService.issueCoupon(request);
+    @Transactional
+    public void tryToIssuanceCoupon(final TimeAttackCouponIssuance issuance) {
+
+        // 1. 선착순 쿠폰 발급 시도
+        CouponIssuanceResult result = timeAttackCouponIssuer.tryIssuance(issuance);
+
+        // 2. Spring Event 발행
+        if (result.isSuccess()) {
+            DomainEventEnvelop envelop = result.toEvent();
+            applicationEventPublisher.publish(envelop);
+        }
     }
+
+//    @KafkaListener(topics = KafkaTopic.COUPON_ISSUANCE)
+//    public void handleCouponRequest(CouponIssueRequest request) {
+//        couponIssueService.issueCoupon(request);
+//    }
 }
