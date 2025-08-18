@@ -7,5 +7,5 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 public class CouponIssuanceRequestDto {
-    private String userId;
+    private Long userId;
 }

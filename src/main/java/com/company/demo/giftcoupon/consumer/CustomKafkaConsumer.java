@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import com.company.demo.giftcoupon.mapper.dto.request.TryIssueCouponCommand;
 
 @Slf4j
 @Component
@@ -27,14 +28,7 @@ public class CustomKafkaConsumer {
         // 1. 메시지 역직렬화 (예: ObjectMapper 사용)
         CouponIssuanceRequestDto dto = new ObjectMapper().readValue(messageJson, CouponIssuanceRequestDto.class);
 
-        // 2. DTO -> Command 변환
-        TryIssueCouponCommand command = TryIssueCouponCommand.builder()
-                .memberId(dto.getMemberId())
-                .couponId(dto.getCouponId())
-                .requestId(dto.getRequestId())
-                .build();
-
-        // 3. 서비스 호출
-        couponIssueService.tryToIssueCoupon(command);
+        // 2. DTO -> Command 변환 후 서비스 호출
+        couponIssueService.tryToIssueCoupon(TryIssueCouponCommand.from(dto));
     }
 }
