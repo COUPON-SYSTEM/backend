@@ -13,12 +13,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(ApiResponse.error(code, message));
     }
 
-    @ExceptionHandler(BusinessException.class)
+    @ExceptionHandler(BusinessException.class) // BusinessException를 상속받은 예외처리
     public ResponseEntity<ApiResponse<?>> handleBusinessException(BusinessException e) {
         log.error("businessException exception occurred: {}", e.getMessage(), e);
 
         return newResponseEntity(e.getErrorCode().getCode(), e.getMessage(),
                 HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({Exception.class, RuntimeException.class}) // 정의하지 않은 예외처리
+    public ResponseEntity<ApiResponse<?>> handleException(Exception e) {
+        log.error("Unexpected exception occurred: {}", e.getMessage(), e);
+
+        return newResponseEntity(ErrorCode.UNEXPECTED.getCode(), e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

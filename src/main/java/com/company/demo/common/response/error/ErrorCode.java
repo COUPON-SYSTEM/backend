@@ -1,6 +1,7 @@
 package com.company.demo.common.response.error;
 
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ErrorCode {
@@ -9,7 +10,7 @@ public enum ErrorCode {
     INVALID_INPUT_VALUE(400, "C004", "Invalid Input Value"),
     METHOD_NOT_ALLOWED(405, "C005", "Method not allowed");
 
-    private final int status; // TODO: HTTP Status를 쓸지 고민
+    private final int status;
     private final String code;
     private final String message;
 
