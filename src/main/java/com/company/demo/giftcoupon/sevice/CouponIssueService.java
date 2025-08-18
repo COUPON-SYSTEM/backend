@@ -1,14 +1,10 @@
 package com.company.demo.giftcoupon.sevice;
 
 import com.company.demo.giftcoupon.domain.entity.Coupon;
-import com.company.demo.giftcoupon.event.CouponIssuanceEvent;
 import com.company.demo.giftcoupon.mapper.dto.request.CouponIssuanceRequestDto;
-import com.company.demo.giftcoupon.mapper.dto.request.CouponIssueRequestDto;
 import com.company.demo.giftcoupon.mapper.dto.response.CouponIssueResponseDto;
-import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +32,7 @@ public class CouponIssueService {
         }
     }
 
-    private CouponIssueResponseDto issueCoupon(CouponIssueRequestDto request) {
+    private CouponIssueResponseDto issueCoupon(CouponIssuanceRequestDto request) {
         Coupon coupon = Coupon.codeOnlyBuilder()
                 .code("메롱")
                 .build();
