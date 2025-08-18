@@ -2,7 +2,7 @@ package com.company.demo.giftcoupon.outbox.event;
 
 import java.time.LocalDateTime;
 
-public record CouponIssuancePayload(
+public record CouponIssuedPayload(
         Long memberId,
         Long couponId,
         LocalDateTime issuedAt

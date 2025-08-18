@@ -18,7 +18,6 @@ import com.company.demo.giftcoupon.domain.repository.CouponRepository;
 @Service
 @RequiredArgsConstructor
 public class CouponIssueService {
-    private final CustomKafkaProducer customKafkaProducer;
     private final CouponRepository couponRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -26,27 +25,22 @@ public class CouponIssueService {
     public void tryToIssueCoupon(final CouponIssuanceRequestDto requestDto) {
 
         // 1. 선착순 쿠폰 발급 시도(발급 여부 검증)
-        CouponIssuanceResult result = timeAttackCouponIssuer.tryIssuance(requestDto);
+        // CouponIssuanceResult result = timeAttackCouponIssuer.tryIssuance(requestDto);
+        CouponIssueResponseDto result = this.issueCoupon(requestDto);
 
         // 2. Spring Event 발행
         if (result.isSuccess()) {
             DomainEventEnvelop envelop = result.toEvent();
-            applicationEventPublisher.publish(envelop);
+            applicationEventPublisher.publishEvent(envelop);
         }
     }
 
-
-//    @Transactional
-//    public CouponIssueResponseDto issueCoupon(CouponIssueRequestDto request) {
-//        Coupon coupon = Coupon.codeOnlyBuilder()
-//                .code("메롱")
-//                .build();
-//        couponRepository.save(coupon);
-//        log.info("쿠폰 DB에 저장 완료");
-//        return CouponIssueResponseDto.of(coupon);
-//
-//        // 2. Kafka에 "발급 완료" 메시지 발행
-//        //CouponIssuedEvent event = new CouponIssuedEvent(userId, ...);
-//        // kafkaTemplate.send("coupon-issued-topic", event);
-//    }
+    private CouponIssueResponseDto issueCoupon(CouponIssueRequestDto request) {
+        Coupon coupon = Coupon.codeOnlyBuilder()
+                .code("메롱")
+                .build();
+        couponRepository.save(coupon);
+        log.info("쿠폰 DB에 저장 완료");
+        return CouponIssueResponseDto.of(coupon);
+    }
 }
