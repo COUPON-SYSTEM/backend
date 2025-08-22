@@ -1,6 +1,6 @@
-package com.company.demo.giftcoupon.mapper.dto.request;
+package com.company.demo.giftcoupon.outbox.domain.entity;
 
-import lombok.*;
+import com.company.demo.giftcoupon.mapper.dto.request.CouponIssuanceRequestDto;
 
 /**
  * 쿠폰 발급 시도 명령

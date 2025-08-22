@@ -1,15 +1,19 @@
 package com.company.demo.giftcoupon.sevice;
 
 import com.company.demo.giftcoupon.domain.entity.Coupon;
-import com.company.demo.giftcoupon.mapper.dto.request.CouponIssuanceRequestDto;
-import com.company.demo.giftcoupon.mapper.dto.request.TryIssueCouponCommand;
-import com.company.demo.giftcoupon.mapper.dto.response.CouponIssueResponseDto;
+import com.company.demo.giftcoupon.outbox.domain.entity.TryIssueCouponCommand;
+import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedEvent;
+import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
+import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
+import com.company.demo.giftcoupon.outbox.domain.result.CouponIssuanceResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.company.demo.giftcoupon.domain.repository.CouponRepository;
+
+import java.time.LocalDateTime;
 
 
 @Slf4j
@@ -20,25 +24,33 @@ public class CouponIssueService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
-    public void tryToIssueCoupon(final TryIssueCouponCommand comman) {
+    public void tryToIssueCoupon(final TryIssueCouponCommand command) {
 
         // 1. 선착순 쿠폰 발급 시도(발급 여부 검증)
-        // CouponIssuanceResult result = timeAttackCouponIssuer.tryIssuance(requestDto);
-        CouponIssueResponseDto result = this.issueCoupon(requestDto);
+        CouponIssuanceResult result = this.issueCoupon(command);
 
-        // 2. Spring Event 발행
+        // 2) 성공 시 이벤트 → Envelope → publish
         if (result.isSuccess()) {
-            DomainEventEnvelop envelop = result.toEvent();
-            applicationEventPublisher.publishEvent(envelop);
+            // 이벤트 생성 (command + result 사용)
+            CouponIssuedEvent event = new CouponIssuedEvent(
+                    command.userId(),
+                    result.getCoupon().getId(),
+                    "coupon-service",                // or 환경설정/상수
+                    LocalDateTime.now()
+            );
+
+            DomainEventEnvelope<CouponIssuedPayload> envelope = event.envelop();
+            applicationEventPublisher.publishEvent(envelope);
         }
     }
 
-    private CouponIssueResponseDto issueCoupon(TryIssueCouponCommand request) {
-        Coupon coupon = Coupon.codeOnlyBuilder()
+    private CouponIssuanceResult issueCoupon(TryIssueCouponCommand command) {
+        Coupon coupon = Coupon.builder()
+
                 .code("메롱")
                 .build();
         couponRepository.save(coupon);
         log.info("쿠폰 DB에 저장 완료");
-        return CouponIssueResponseDto.of(coupon);
+        return CouponIssuanceResult.from(coupon);
     }
 }

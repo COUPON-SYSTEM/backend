@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import com.company.demo.giftcoupon.mapper.dto.request.TryIssueCouponCommand;
+import com.company.demo.giftcoupon.outbox.domain.entity.TryIssueCouponCommand;
 
 @Slf4j
 @Component
@@ -18,7 +18,7 @@ public class CustomKafkaConsumer {
 
     private final CouponIssueService couponIssueService;
 
-    @KafkaListener(topics = "test-topic", groupId = "consumer-group1")
+    @KafkaListener(topics = KafkaTopic.TEST_TOPIC , groupId = "consumer-group1")
     public void handleMessage(String message) {
         log.info("Received message: {}", message);
     }
