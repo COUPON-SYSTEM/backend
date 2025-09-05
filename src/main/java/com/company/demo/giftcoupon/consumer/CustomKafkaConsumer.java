@@ -1,8 +1,9 @@
 package com.company.demo.giftcoupon.consumer;
 
 import com.company.demo.common.constant.KafkaTopic;
+import com.company.demo.giftcoupon.event.CouponIssuedEvent;
 import com.company.demo.giftcoupon.mapper.dto.request.CouponIssueRequest;
-import com.company.demo.giftcoupon.sevice.CouponIssueService;
+import com.company.demo.giftcoupon.sevice.CouponIssueListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CustomKafkaConsumer {
 
-    private final CouponIssueService couponIssueService;
+    private final CouponIssueListener couponIssueListener;
 
     @KafkaListener(topics = "test-topic", groupId = "consumer-group1")
     public void handleMessage(String message) {
@@ -22,6 +23,11 @@ public class CustomKafkaConsumer {
 
     @KafkaListener(topics = KafkaTopic.COUPON_REQUEST)
     public void handleCouponRequest(CouponIssueRequest request) {
-        couponIssueService.issueCoupon(request);
+        couponIssueListener.issueCoupon(request);
+    }
+
+    @KafkaListener(topics = KafkaTopic.COUPON_ISSUED)
+    public void handleCouponIssued(CouponIssuedEvent event) {
+        couponIssueListener.notificationCoupon(event);
     }
 }
