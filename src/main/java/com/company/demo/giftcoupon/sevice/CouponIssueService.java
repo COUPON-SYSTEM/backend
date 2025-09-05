@@ -1,5 +1,6 @@
 package com.company.demo.giftcoupon.sevice;
 
+import com.company.demo.common.constant.EventType;
 import com.company.demo.giftcoupon.domain.entity.Coupon;
 import com.company.demo.giftcoupon.outbox.domain.entity.TryIssueCouponCommand;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedEvent;
@@ -33,9 +34,9 @@ public class CouponIssueService {
         if (result.isSuccess()) {
             // 이벤트 생성 (command + result 사용)
             CouponIssuedEvent event = new CouponIssuedEvent(
-                    command.userId(),
+                    command.memberId(),
                     result.getCoupon().getId(),
-                    "coupon-service",                // or 환경설정/상수
+                    EventType.ISSUED_EVENT,
                     LocalDateTime.now()
             );
 
@@ -46,8 +47,8 @@ public class CouponIssueService {
 
     private CouponIssuanceResult issueCoupon(TryIssueCouponCommand command) {
         Coupon coupon = Coupon.builder()
-
-                .code("메롱")
+                .memberId(command.memberId())
+                .code(command.source())
                 .build();
         couponRepository.save(coupon);
         log.info("쿠폰 DB에 저장 완료");

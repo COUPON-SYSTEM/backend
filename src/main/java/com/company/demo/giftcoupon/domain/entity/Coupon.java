@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Table(name = "coupons")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Builder
 public class Coupon {
 
     @Id
@@ -26,12 +27,8 @@ public class Coupon {
     @Column(name = "coupon_used_at", nullable = true)
     private LocalDateTime usedAt;
 
-    @Builder
-    public Coupon(Long eventId, String code, LocalDateTime usedAt) {
-        this.eventId = eventId;
-        this.code = code;
-        this.usedAt = usedAt;
-    }
+    @Column(name = "member_id", nullable = false)
+    private Long memberId;
 
     @Builder(builderMethodName = "codeOnlyBuilder") // 전용 메서드
     private Coupon(String code) {

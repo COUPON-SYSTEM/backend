@@ -7,10 +7,11 @@ import com.company.demo.giftcoupon.mapper.dto.request.CouponIssuanceRequestDto;
  * - 서비스 메서드 파라미터로 전달
  */
 public record TryIssueCouponCommand(
-        Long userId
+        Long memberId,
+        String source
         // String requestId // 멱등성 보장을 위한 요청 ID (optional)
 ) {
     public static TryIssueCouponCommand from(CouponIssuanceRequestDto requestDto) {
-        return new TryIssueCouponCommand(requestDto.getUserId());
+        return new TryIssueCouponCommand(requestDto.getMemberId(), requestDto.getSource());
     }
 }
