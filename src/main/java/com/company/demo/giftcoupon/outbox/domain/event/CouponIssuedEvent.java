@@ -14,7 +14,7 @@ import java.util.UUID;
 public record CouponIssuedEvent(
         Long memberId,
         Long couponId,
-        String source,
+        String eventType,
         LocalDateTime occurredAt
 ) {
     /** 아웃박스 기록을 위한 래핑(Envelope) */
@@ -22,7 +22,7 @@ public record CouponIssuedEvent(
         return new DomainEventEnvelope<>(
                 UUID.randomUUID().toString(),      // event_id
                 EventType.ISSUED_EVENT,
-                source,
+                eventType,
                 CouponIssuedPayload.of(memberId, couponId, occurredAt)
         );
     }

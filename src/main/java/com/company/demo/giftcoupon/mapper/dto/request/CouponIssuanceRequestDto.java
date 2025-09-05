@@ -7,5 +7,6 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 public class CouponIssuanceRequestDto {
-    private Long userId;
+    private Long memberId;
+    private String source;
 }
