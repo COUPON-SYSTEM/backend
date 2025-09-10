@@ -28,6 +28,6 @@ public class CustomKafkaConsumer {
 
     @KafkaListener(topics = KafkaTopic.COUPON_ISSUED)
     public void handleCouponIssued(CouponIssuedEvent event) {
-        couponIssueListener.notificationCoupon(event);
+        couponIssueListener.handle(event);
     }
 }

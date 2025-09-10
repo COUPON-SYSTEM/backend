@@ -2,14 +2,18 @@ package com.company.demo.giftcoupon.sevice;
 
 import com.company.demo.giftcoupon.domain.entity.Coupon;
 import com.company.demo.giftcoupon.event.CouponIssuedEvent;
+import com.company.demo.giftcoupon.handler.CouponEventHandler;
 import com.company.demo.giftcoupon.mapper.dto.request.CouponIssueRequest;
 import com.company.demo.giftcoupon.mapper.dto.response.CouponIssueResponse;
 import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.company.demo.giftcoupon.domain.repository.CouponRepository;
+
+import java.util.List;
 
 
 @Slf4j
@@ -18,8 +22,7 @@ import com.company.demo.giftcoupon.domain.repository.CouponRepository;
 public class CouponIssueListener {
     private final CustomKafkaProducer customKafkaProducer;
     private final CouponRepository couponRepository;
-    private final HistoryListener historyListener;
-    private final NotificationListener notificationListener;
+    private final List<CouponEventHandler> couponEventHandlers;
 
     @Transactional
     public CouponIssueResponse issueCoupon(CouponIssueRequest request) {
@@ -35,9 +38,22 @@ public class CouponIssueListener {
         // kafkaTemplate.send("coupon-issued-topic", event);
     }
 
-    // TODO: Transactional 단위를 어떻게 할지
-    public void notificationCoupon(CouponIssuedEvent event) {
-        historyListener.issuedHistorySave(event);
-        notificationListener.notification(event);
+    public void handle(CouponIssuedEvent event) {
+        log.info("쿠폰 이벤트 핸들러 처리 시작 - CouponId: {}", event.getCouponId());
+
+        for (CouponEventHandler handler : couponEventHandlers) {
+            try {
+                long startTime = System.currentTimeMillis();
+                handler.handle(event);
+                log.info("핸들러 처리 완료 - Type: {}, 소요시간: {}ms",
+                        handler.getClass().getSimpleName(),
+                        System.currentTimeMillis() - startTime);
+            } catch (Exception e) {
+                log.error("핸들러 처리 실패 - Type: {}, Error: {}",
+                        handler.getClass().getSimpleName(), e.getMessage(), e);
+            }
+        }
+
+        log.info("모든 쿠폰 이벤트 핸들러 처리 완료 - CouponId: {}", event.getCouponId());
     }
 }
