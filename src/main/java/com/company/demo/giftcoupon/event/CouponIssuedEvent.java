@@ -9,7 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder(access = AccessLevel.PROTECTED)
 public class CouponIssuedEvent {
-    private String couponId;
-    private String userId;
+    private Long couponId;
+    private Long userId;
     private String message;
 }
