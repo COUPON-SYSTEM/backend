@@ -1,4 +1,4 @@
-package com.company.demo.giftcoupon.sevice;
+package com.company.demo.giftcoupon.handler;
 
 import com.company.demo.giftcoupon.domain.entity.History;
 import com.company.demo.giftcoupon.domain.repository.HistoryRepository;

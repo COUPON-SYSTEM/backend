@@ -1,11 +1,11 @@
-package com.company.demo.giftcoupon.sevice;
+package com.company.demo.giftcoupon.handler.sevice;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-class SmsService {
+public class SmsService {
     public void sendSms(String to, String message) {
         try {
             // smsApiClient.send(to, message); // 실제 SMS API 호출 로직

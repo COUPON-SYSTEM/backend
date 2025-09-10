@@ -2,6 +2,7 @@ package com.company.demo.giftcoupon.producer;
 
 import com.company.demo.common.constant.KafkaTopic;
 import com.company.demo.giftcoupon.event.CouponRequestEvent;
+import com.company.demo.common.client.CustomKafkaProducer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;

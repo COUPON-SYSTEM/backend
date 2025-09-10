@@ -1,14 +1,12 @@
-package com.company.demo.giftcoupon.sevice;
+package com.company.demo.giftcoupon.handler;
 
 import com.company.demo.giftcoupon.domain.entity.Coupon;
 import com.company.demo.giftcoupon.event.CouponIssuedEvent;
-import com.company.demo.giftcoupon.handler.CouponEventHandler;
 import com.company.demo.giftcoupon.mapper.dto.request.CouponIssueRequest;
 import com.company.demo.giftcoupon.mapper.dto.response.CouponIssueResponse;
-import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
+import com.company.demo.common.client.CustomKafkaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.company.demo.giftcoupon.domain.repository.CouponRepository;

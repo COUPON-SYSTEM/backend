@@ -1,4 +1,4 @@
-package com.company.demo.giftcoupon.producer;
+package com.company.demo.common.client;
 
 import com.company.demo.common.constant.KafkaTopic;
 import com.company.demo.giftcoupon.event.CouponRequestEvent;

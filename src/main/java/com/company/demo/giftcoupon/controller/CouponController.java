@@ -1,6 +1,6 @@
 package com.company.demo.giftcoupon.controller;
 
-import com.company.demo.giftcoupon.queue.CouponRequestRedisQueue;
+import com.company.demo.giftcoupon.config.queue.CouponRequestRedisQueue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

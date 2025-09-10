@@ -1,12 +1,13 @@
-package com.company.demo.giftcoupon.sevice;
+package com.company.demo.giftcoupon.handler;
 
 import com.company.demo.giftcoupon.event.CouponIssuedEvent;
 import com.company.demo.giftcoupon.handler.CouponEventHandler;
+import com.company.demo.giftcoupon.handler.sevice.EmailService;
+import com.company.demo.giftcoupon.handler.sevice.SmsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 @Component
 @RequiredArgsConstructor

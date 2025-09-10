@@ -1,9 +1,9 @@
-package com.company.demo.giftcoupon.consumer;
+package com.company.demo.common.client;
 
 import com.company.demo.common.constant.KafkaTopic;
 import com.company.demo.giftcoupon.event.CouponIssuedEvent;
+import com.company.demo.giftcoupon.handler.CouponIssueListener;
 import com.company.demo.giftcoupon.mapper.dto.request.CouponIssueRequest;
-import com.company.demo.giftcoupon.sevice.CouponIssueListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
