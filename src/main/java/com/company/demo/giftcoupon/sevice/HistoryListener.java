@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HistoryListener implements CouponEventHandler {
 
-    private HistoryRepository historyRepository;
+    private final HistoryRepository historyRepository;
 
     @Override
     @Async
