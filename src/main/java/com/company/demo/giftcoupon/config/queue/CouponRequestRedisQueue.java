@@ -1,7 +1,6 @@
-package com.company.demo.giftcoupon.queue;
+package com.company.demo.giftcoupon.config.queue;
 
 import com.company.demo.common.constant.RedisKey;
-import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

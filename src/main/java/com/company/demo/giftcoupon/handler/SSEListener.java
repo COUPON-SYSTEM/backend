@@ -1,4 +1,4 @@
-package com.company.demo.giftcoupon.sevice;
+package com.company.demo.giftcoupon.handler;
 
 import com.company.demo.giftcoupon.domain.repository.SseEmitterRepository;
 import com.company.demo.giftcoupon.event.CouponIssuedEvent;

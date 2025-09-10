@@ -1,4 +1,4 @@
-package com.company.demo.giftcoupon.sevice;
+package com.company.demo.giftcoupon.handler.sevice;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
