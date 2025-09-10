@@ -11,5 +11,7 @@ import lombok.Getter;
 public class CouponIssuedEvent {
     private Long couponId;
     private Long userId;
+    private String userEmail;
+    private String userPhone;
     private String message;
 }

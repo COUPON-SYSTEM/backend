@@ -33,7 +33,7 @@ dependencies {
 	// MySQL
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
-  // Test
+  	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
@@ -48,6 +48,12 @@ dependencies {
 
 	// batch
 	implementation 'org.springframework.boot:spring-boot-starter-batch'
+
+	// email
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	// RabbitMQ와 AMQP를 위한 의존성 추가
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
 }
 
