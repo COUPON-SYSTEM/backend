@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 @Component
 public class NotificationListener implements CouponEventHandler {
 
+    // TODO: 각각 핸들러를 분리해야할지, 동기 비동기 중 무엇으로 처리할지
     @Override
     @Async
     public void handle(CouponIssuedEvent event) {
