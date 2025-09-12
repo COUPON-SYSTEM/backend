@@ -3,7 +3,7 @@ package com.company.demo.giftcoupon.outbox;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import com.company.demo.giftcoupon.outbox.domain.entity.CouponIssuanceOutbox;
+import com.company.demo.giftcoupon.outbox.domain.entity.CouponIssuanceOutboxEvent;
 import com.company.demo.giftcoupon.outbox.domain.repository.CouponIssuanceOutboxRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
@@ -19,7 +19,7 @@ public class CouponExternalEventRecorder {
     /** Envelope.payload를 JSON으로 저장 */
     public void record(DomainEventEnvelope<?> env) {
         String json = toJson(env.payload());
-        CouponIssuanceOutbox row = CouponIssuanceOutbox.builder()
+        CouponIssuanceOutboxEvent row = CouponIssuanceOutboxEvent.builder()
                 .eventId(env.eventId())
                 .eventType(env.eventType())
                 .payload(json)
