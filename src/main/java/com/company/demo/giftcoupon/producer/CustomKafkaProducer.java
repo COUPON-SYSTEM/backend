@@ -23,6 +23,7 @@ public class CustomKafkaProducer {
     public void sendRequestMessage(CouponIssuanceEvent event) {
         giftKafkaTemplate.send(KafkaTopic.COUPON_ISSUANCE, event);
     }
+
 /*
     public void sendOrderEvent(OrderEvent event) {
         kafkaTemplate.send("order-topic", event);
