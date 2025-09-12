@@ -1,7 +1,5 @@
 package com.company.demo.giftcoupon.outbox.domain.event;
 
-import com.company.demo.common.constant.EventType;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -17,12 +15,22 @@ public record CouponIssuedEvent(
         String eventType,
         LocalDateTime occurredAt
 ) {
-    /** 아웃박스 기록을 위한 래핑(Envelope) */
-    public DomainEventEnvelope<CouponIssuedPayload> envelop() {
-        return new DomainEventEnvelope<>(
-                UUID.randomUUID().toString(),      // event_id
-                EventType.ISSUED_EVENT,
+    /** eventId를 내부에서 생성 */
+    public DomainEventEnvelope<CouponIssuedPayload> toEnvelope(String source) {
+        return DomainEventEnvelope.of(
+                UUID.randomUUID().toString(),
                 eventType,
+                source,
+                CouponIssuedPayload.of(memberId, couponId, occurredAt)
+        );
+    }
+
+    /** eventId를 외부에서 주입하고 싶을 때 */
+    public DomainEventEnvelope<CouponIssuedPayload> toEnvelope(String source, String eventId) {
+        return DomainEventEnvelope.of(
+                eventId,
+                eventType,
+                source,
                 CouponIssuedPayload.of(memberId, couponId, occurredAt)
         );
     }

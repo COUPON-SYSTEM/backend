@@ -26,23 +26,24 @@ public class CouponIssueService {
 
     @Transactional
     public void tryToIssueCoupon(final TryIssueCouponCommand command) {
-
-        // 1. 선착순 쿠폰 발급 시도(발급 여부 검증)
+        // 1) 쿠폰 발급 시도
         CouponIssuanceResult result = this.issueCoupon(command);
+        if (!result.isSuccess()) return;
 
-        // 2) 성공 시 이벤트 → Envelope → publish
-        if (result.isSuccess()) {
-            // 이벤트 생성 (command + result 사용)
-            CouponIssuedEvent event = new CouponIssuedEvent(
-                    command.memberId(),
-                    result.getCoupon().getId(),
-                    EventType.ISSUED_EVENT,
-                    LocalDateTime.now()
-            );
+        Coupon coupon = result.getCoupon();
 
-            DomainEventEnvelope<CouponIssuedPayload> envelope = event.envelop();
-            applicationEventPublisher.publishEvent(envelope);
-        }
+        // 2) 도메인 이벤트 → envelope로 감싸 발행
+        CouponIssuedEvent event = new CouponIssuedEvent(
+                command.memberId(),
+                coupon.getId(),
+                EventType.ISSUED_EVENT,
+                LocalDateTime.now()
+        );
+
+        // source는 서비스 식별자나 컨텍스트 값(예: command.source())로 지정
+        DomainEventEnvelope<CouponIssuedPayload> envelope = event.toEnvelope("giftcoupon-service");
+        applicationEventPublisher.publishEvent(envelope);
+        log.info("쿠폰 발급 이벤트(envelope) 발행 완료. memberId={}, couponId={}", command.memberId(), coupon.getId());
     }
 
     private CouponIssuanceResult issueCoupon(TryIssueCouponCommand command) {
