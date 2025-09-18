@@ -1,6 +1,7 @@
 package com.company.demo.giftcoupon.sevice;
 
 import com.company.demo.common.constant.EventType;
+import com.company.demo.common.constant.Source;
 import com.company.demo.giftcoupon.domain.entity.Coupon;
 import com.company.demo.giftcoupon.outbox.domain.entity.TryIssueCouponCommand;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedEvent;
@@ -26,13 +27,14 @@ public class CouponIssueService {
 
     @Transactional
     public void tryToIssueCoupon(final TryIssueCouponCommand command) {
-        // 1) 쿠폰 발급 시도
+        // 쿠폰 발급 시도
         CouponIssuanceResult result = this.issueCoupon(command);
         if (!result.isSuccess()) return;
 
         Coupon coupon = result.getCoupon();
 
-        // 2) 도메인 이벤트 → envelope로 감싸 발행
+        // 회원이 쿠폰을 발급받은 사실(주관심사)을 기록하면서
+        // 동시에 이 사실을 담은 메시지(비괌심사)의 고유 ID를 넣으면 관심사 분리가 모호해짐
         CouponIssuedEvent event = new CouponIssuedEvent(
                 null,
                 command.memberId(),
@@ -41,8 +43,8 @@ public class CouponIssueService {
                 LocalDateTime.now()
         );
 
-        // source는 서비스 식별자나 컨텍스트 값(예: command.source())로 지정
-        DomainEventEnvelope<CouponIssuedPayload> envelope = event.toEnvelope("giftcoupon-service");
+        // 도메인 이벤트 → envelope로 감싸 발행
+        DomainEventEnvelope<CouponIssuedPayload> envelope = event.toEnvelope(command.source());
         applicationEventPublisher.publishEvent(envelope);
         log.info("쿠폰 발급 이벤트(envelope) 발행 완료. memberId={}, couponId={}", command.memberId(), coupon.getId());
     }
