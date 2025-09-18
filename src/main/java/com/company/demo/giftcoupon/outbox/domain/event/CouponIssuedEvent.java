@@ -1,5 +1,7 @@
 package com.company.demo.giftcoupon.outbox.domain.event;
 
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -8,9 +10,8 @@ import java.util.UUID;
  * 불변객체를 만들기 위해서는 보일러플레이트가 필요합니다.
  * Spring 4.2 이후부터는 @EventListener가 record 타입을 인식할 수 있습니다.
  */
-
 public record CouponIssuedEvent(
-        Long eventId,
+        String eventId,
         Long memberId,
         Long couponId,
         String eventType,
@@ -19,7 +20,7 @@ public record CouponIssuedEvent(
     /** eventId를 내부에서 생성 */
     public DomainEventEnvelope<CouponIssuedPayload> toEnvelope(String source) {
         return DomainEventEnvelope.of(
-                UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(),   // eventId
                 this.eventType,
                 source,
                 CouponIssuedPayload.of(this.memberId, this.couponId, this.issuedAt)
