@@ -1,8 +1,10 @@
 package com.company.demo.giftcoupon.outbox.listener;
 
 import com.company.demo.giftcoupon.outbox.CouponExternalEventRecorder;
+import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -13,7 +15,7 @@ public class CouponIssuedRecordListener {
     private final CouponExternalEventRecorder eventRecorder;
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
-    public void recordEvent(DomainEventEnvelope<?> env) {
+    public void recordEvent(DomainEventEnvelope<CouponIssuedPayload> env) {
         eventRecorder.record(env); // payload를 JSON 직렬화해 Outbox에 insert
     }
 }

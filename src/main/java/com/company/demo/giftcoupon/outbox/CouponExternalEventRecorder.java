@@ -1,5 +1,6 @@
 package com.company.demo.giftcoupon.outbox;
 
+import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,7 @@ public class CouponExternalEventRecorder {
     private final ObjectMapper objectMapper;
 
     /** Envelope.payload를 JSON으로 저장 */
-    public void record(DomainEventEnvelope<?> env) {
+    public void record(DomainEventEnvelope<CouponIssuedPayload> env) {
         String json = toJson(env.payload());
         CouponIssuanceOutboxEvent row = CouponIssuanceOutboxEvent.builder()
                 .eventId(env.eventId())
