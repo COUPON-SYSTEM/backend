@@ -2,7 +2,6 @@ package com.company.demo.giftcoupon.producer;
 
 import com.company.demo.common.constant.KafkaTopic;
 import com.company.demo.giftcoupon.event.CouponIssuanceEvent;
-import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedEvent;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +24,7 @@ public class CustomKafkaProducer {
     }
 
     public void sendRequestMessage(CouponIssuanceEvent event) {
-        giftKafkaTemplate.send(KafkaTopic.COUPON_ISSUANCE, event);
+        giftKafkaTemplate.send(KafkaTopic.COUPON_ISSUE, event);
     }
 
     public void sendIssuedMessage(DomainEventEnvelope<CouponIssuedPayload> envelope) {
