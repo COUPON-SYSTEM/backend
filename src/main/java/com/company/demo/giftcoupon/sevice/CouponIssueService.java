@@ -34,6 +34,7 @@ public class CouponIssueService {
 
         // 2) 도메인 이벤트 → envelope로 감싸 발행
         CouponIssuedEvent event = new CouponIssuedEvent(
+                null,
                 command.memberId(),
                 coupon.getId(),
                 EventType.ISSUED_EVENT,

@@ -8,4 +8,5 @@ import lombok.*;
 @Builder
 public class CouponIssuanceEvent {
     private String userId;
+    private Long eventId;
 }
