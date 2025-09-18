@@ -1,7 +1,7 @@
 package com.company.demo.giftcoupon.consumer;
 
 import com.company.demo.common.constant.KafkaTopic;
-import com.company.demo.giftcoupon.mapper.dto.request.CouponIssueRequestDto;
+import com.company.demo.giftcoupon.mapper.dto.request.CouponIssueRequest;
 import com.company.demo.giftcoupon.sevice.CouponIssueService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,10 +23,10 @@ public class CustomKafkaConsumer {
         log.info("Received message: {}", message);
     }
 
-    @KafkaListener(topics = KafkaTopic.COUPON_ISSUANCE)
+    @KafkaListener(topics = KafkaTopic.COUPON_ISSUE)
     public void handleIssuanceMessage(String messageJson) throws JsonProcessingException {
         // 1. 메시지 역직렬화 (예: ObjectMapper 사용)
-        CouponIssueRequestDto dto = new ObjectMapper().readValue(messageJson, CouponIssueRequestDto.class);
+        CouponIssueRequest dto = new ObjectMapper().readValue(messageJson, CouponIssueRequest.class);
 
         // 2. DTO -> Command 변환 후 서비스 호출
         couponIssueService.tryToIssueCoupon(TryIssueCouponCommand.from(dto));

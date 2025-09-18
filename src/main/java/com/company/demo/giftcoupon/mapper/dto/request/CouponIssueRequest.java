@@ -6,6 +6,6 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
-public class CouponIssueRequestDto {
+public class CouponIssueRequest {
     private Long memberId;
 }
