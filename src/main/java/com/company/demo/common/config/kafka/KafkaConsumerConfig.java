@@ -1,6 +1,6 @@
 package com.company.demo.common.config.kafka;
 
-import com.company.demo.giftcoupon.event.CouponIssuanceEvent;
+import com.company.demo.giftcoupon.event.CouponIssueEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -44,10 +44,10 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, CouponIssuanceEvent> couponRequestEventListenerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, CouponIssuanceEvent> factory =
+    public ConcurrentKafkaListenerContainerFactory<String, CouponIssueEvent> couponRequestEventListenerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, CouponIssueEvent> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory(CouponIssuanceEvent.class));
+        factory.setConsumerFactory(consumerFactory(CouponIssueEvent.class));
         return factory;
     }
 
@@ -69,10 +69,10 @@ public class KafkaConsumerConfig {
 //    }
 //
 //    @Bean
-//    public ConcurrentKafkaListenerContainerFactory<String, CouponIssuanceEvent> couponRequestEventListenerFactory() {
-//        ConcurrentKafkaListenerContainerFactory<String, CouponIssuanceEvent> factory =
+//    public ConcurrentKafkaListenerContainerFactory<String, CouponIssueEvent> couponRequestEventListenerFactory() {
+//        ConcurrentKafkaListenerContainerFactory<String, CouponIssueEvent> factory =
 //                new ConcurrentKafkaListenerContainerFactory<>();
-//        factory.setConsumerFactory(this.<CouponIssuanceEvent>avroConsumerFactory());
+//        factory.setConsumerFactory(this.<CouponIssueEvent>avroConsumerFactory());
 //        return factory;
 //    }
 }

@@ -42,17 +42,4 @@ public class CouponIssuanceOutboxEvent {
     private boolean published;
 
     public void markPublished() { this.published = true; }
-
-
-//    public static CouponIssuanceOutboxEvent fromEnvelope(DomainEventEnvelope<?> env, String payloadJson) {
-//        return new CouponIssuanceOutboxEvent(
-//                env.eventId(),
-//                env.eventType(),
-//                env.source(),
-//                payloadJson,
-//                // env.payloadOccurredAt(),  // 없으면 env에서 occurredAt 넘기도록 설계
-//                Status.PENDING,
-//                LocalDateTime.now()
-//        );
-//    }
 }

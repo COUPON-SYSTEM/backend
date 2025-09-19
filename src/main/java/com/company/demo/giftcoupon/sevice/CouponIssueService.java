@@ -1,7 +1,6 @@
 package com.company.demo.giftcoupon.sevice;
 
 import com.company.demo.common.constant.EventType;
-import com.company.demo.common.constant.Source;
 import com.company.demo.giftcoupon.domain.entity.Coupon;
 import com.company.demo.giftcoupon.outbox.domain.entity.TryIssueCouponCommand;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedEvent;
@@ -49,7 +48,7 @@ public class CouponIssueService {
         log.info("쿠폰 발급 이벤트(envelope) 발행 완료. memberId={}, couponId={}", command.memberId(), coupon.getId());
     }
 
-    private CouponIssuanceResult issueCoupon(TryIssueCouponCommand command) {
+    private CouponIssuanceResult issueCoupon(final TryIssueCouponCommand command) {
         Coupon coupon = Coupon.builder()
                 .memberId(command.memberId())
                 .code(command.source())
