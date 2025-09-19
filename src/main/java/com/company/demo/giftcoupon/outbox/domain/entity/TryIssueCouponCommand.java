@@ -1,6 +1,7 @@
 package com.company.demo.giftcoupon.outbox.domain.entity;
 
 import com.company.demo.common.constant.Source;
+import com.company.demo.giftcoupon.event.CouponIssueEvent;
 import com.company.demo.giftcoupon.mapper.dto.request.CouponIssueRequest;
 
 /**
@@ -12,7 +13,7 @@ public record TryIssueCouponCommand(
         String source
         // String requestId // 멱등성 보장을 위한 요청 ID (optional)
 ) {
-    public static TryIssueCouponCommand from(CouponIssueRequest requestDto) {
-        return new TryIssueCouponCommand(requestDto.getMemberId(), Source.COUPON_ISSUE);
+    public static TryIssueCouponCommand from(String memberId, String source) {
+        return new TryIssueCouponCommand(Long.parseLong(memberId), source);
     }
 }

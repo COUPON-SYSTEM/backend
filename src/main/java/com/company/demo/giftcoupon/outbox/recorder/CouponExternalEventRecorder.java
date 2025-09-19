@@ -1,5 +1,7 @@
 package com.company.demo.giftcoupon.outbox.recorder;
 
+import com.company.demo.common.response.error.ErrorCode;
+import com.company.demo.giftcoupon.exception.CouponIssueException;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +16,7 @@ import java.time.LocalDateTime;
 @Component
 @RequiredArgsConstructor
 public class CouponExternalEventRecorder {
-    private final CouponIssuanceOutboxRepository repository;
+    private final CouponIssuanceOutboxRepository couponIssuanceOutboxRepository;
     private final ObjectMapper objectMapper;
 
     /**
@@ -27,22 +29,22 @@ public class CouponExternalEventRecorder {
         String envelopeJson = toJson(envelope);
 
         CouponIssuanceOutboxEvent row = CouponIssuanceOutboxEvent.builder()
-                .eventId(envelope.eventId())             // = event.eventId()
-                .eventType(envelope.eventType())         // "coupon.issued" 등
-                .payload(envelopeJson)                   // ★ Envelope 전체 JSON 저장
-                .source(envelope.source())               // "giftcoupon-service"
+                .eventId(envelope.eventId())
+                .eventType(envelope.eventType())
+                .payload(envelopeJson)                   // payload를 JSON 저장
+                .source(envelope.source())
                 .createdAt(LocalDateTime.now())
                 .published(false)
                 .build();
 
-        repository.save(row);
+        couponIssuanceOutboxRepository.save(row);
     }
 
     private String toJson(Object o) {
         try {
             return objectMapper.writeValueAsString(o);
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Outbox 직렬화 실패", e);
+            throw new CouponIssueException(ErrorCode.COUPON_SERIALIZATION_FAILED);
         }
     }
 }

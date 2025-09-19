@@ -2,7 +2,7 @@ package com.company.demo.common.config.batch;
 
 import com.company.demo.giftcoupon.batch.CouponRequestProcessor;
 import com.company.demo.giftcoupon.batch.KafkaCouponWriter;
-import com.company.demo.giftcoupon.event.CouponIssuanceEvent;
+import com.company.demo.giftcoupon.event.CouponIssueEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -33,7 +33,7 @@ public class CouponRequestJobConfig {
     @Bean
     public Step couponRequestStep() {
         return new StepBuilder("couponIssueStep", jobRepository)
-                .<String, CouponIssuanceEvent>chunk(10, transactionManager)
+                .<String, CouponIssueEvent>chunk(10, transactionManager)
                 .reader(redisCouponReader)
                 .processor(couponRequestProcessor)
                 .writer(kafkaCouponWriter)
