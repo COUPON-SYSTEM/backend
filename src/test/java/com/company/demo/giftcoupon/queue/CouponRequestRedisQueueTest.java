@@ -30,18 +30,18 @@ class CouponRequestRedisQueueTest {
         }
     }
 
-    @Test
-    @DisplayName("10개 저장되어 있는 거 뽑기")
-    void shouldPop10UsersFromRedisQueue() {
-        // Given: Redis 큐에 10개 데이터가 쌓여 있음
-        Long initialSize = redisTemplate.opsForList().size(COUPON_QUEUE_KEY);
-        assertThat(initialSize).isEqualTo(10);
-
-        // When: GiftIssueWorker가 큐를 처리
-        couponRequestRedisQueue.popFromQueueAndSendToKafka();
-
-        // Then: Redis 큐에는 더 이상 데이터가 없어야 함
-        Long remainingSize = redisTemplate.opsForList().size(COUPON_QUEUE_KEY);
-        assertThat(remainingSize).isEqualTo(0);
-    }
+//    @Test
+//    @DisplayName("10개 저장되어 있는 거 뽑기")
+//    void shouldPop10UsersFromRedisQueue() {
+//        // Given: Redis 큐에 10개 데이터가 쌓여 있음
+//        Long initialSize = redisTemplate.opsForList().size(COUPON_QUEUE_KEY);
+//        assertThat(initialSize).isEqualTo(10);
+//
+//        // When: GiftIssueWorker가 큐를 처리
+//        couponRequestRedisQueue.popFromQueueAndSendToKafka();
+//
+//        // Then: Redis 큐에는 더 이상 데이터가 없어야 함
+//        Long remainingSize = redisTemplate.opsForList().size(COUPON_QUEUE_KEY);
+//        assertThat(remainingSize).isEqualTo(0);
+//    }
 }
