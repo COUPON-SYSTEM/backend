@@ -1,5 +1,6 @@
 package com.company.demo.common.config.kafka;
 
+import com.company.demo.giftcoupon.event.CouponIssueEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -9,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import com.company.demo.giftcoupon.event.CouponRequestEvent;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.util.HashMap;
@@ -44,10 +44,10 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, CouponRequestEvent> couponRequestEventListenerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, CouponRequestEvent> factory =
+    public ConcurrentKafkaListenerContainerFactory<String, CouponIssueEvent> couponRequestEventListenerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, CouponIssueEvent> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory(CouponRequestEvent.class));
+        factory.setConsumerFactory(consumerFactory(CouponIssueEvent.class));
         return factory;
     }
 
@@ -69,10 +69,10 @@ public class KafkaConsumerConfig {
 //    }
 //
 //    @Bean
-//    public ConcurrentKafkaListenerContainerFactory<String, CouponRequestEvent> couponRequestEventListenerFactory() {
-//        ConcurrentKafkaListenerContainerFactory<String, CouponRequestEvent> factory =
+//    public ConcurrentKafkaListenerContainerFactory<String, CouponIssueEvent> couponRequestEventListenerFactory() {
+//        ConcurrentKafkaListenerContainerFactory<String, CouponIssueEvent> factory =
 //                new ConcurrentKafkaListenerContainerFactory<>();
-//        factory.setConsumerFactory(this.<CouponRequestEvent>avroConsumerFactory());
+//        factory.setConsumerFactory(this.<CouponIssueEvent>avroConsumerFactory());
 //        return factory;
 //    }
 }
