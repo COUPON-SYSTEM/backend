@@ -16,7 +16,7 @@ import java.io.IOException;
 @Slf4j
 public class SSEListener implements CouponEventHandler {
 
-    private SseEmitterRepository sseEmitterRepository;
+    private final SseEmitterRepository sseEmitterRepository;
 
     @Override
     @Async
@@ -34,11 +34,10 @@ public class SSEListener implements CouponEventHandler {
                         .name("couponIssued")
                         .data(event)
                 );
-                log.info("SSE 데이터 전송 완료");
-            } catch (IOException e) {
-                log.error("SSE 데이터 전송 실패 - UserId: {}", event.getUserId(), e);
+                log.info("SSE 데이터 전송 성공 - UserId: {}", event.getUserId());
+            } catch (Exception e) {
+                log.error("SSE 데이터 전송 실패 - UserId: {}", event.getUserId(), e.getMessage(), e);
                 sseEmitterRepository.deleteById(event.getUserId());
-                throw new RuntimeException(e);
             }
         }
     }

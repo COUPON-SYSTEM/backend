@@ -1,6 +1,8 @@
 package com.company.demo.giftcoupon.handler;
 
+import com.company.demo.common.response.error.ErrorCode;
 import com.company.demo.giftcoupon.event.CouponIssuedEvent;
+import com.company.demo.giftcoupon.exception.InternalServerErrorException;
 import com.company.demo.giftcoupon.handler.CouponEventHandler;
 import com.company.demo.giftcoupon.handler.sevice.EmailService;
 import com.company.demo.giftcoupon.handler.sevice.SmsService;
@@ -32,10 +34,10 @@ public class NotificationListener implements CouponEventHandler {
             emailService.sendEmail(userEmail, "쿠폰 발급 알림", message);
             smsService.sendSms(userPhone, message);
 
-            log.info("사용자 알림 전송 완료");
+            log.info("사용자 알림 전송 성공 - CouponId: {}", event.getCouponId());
         } catch (Exception e) {
-            log.error("알림 전송 실패 - CouponId: {}", event.getCouponId(), e);
-            // exception
+            log.error("사용자 알림 전송 실패 - CouponId: {}", event.getCouponId(), e.getMessage(), e);
+            throw new InternalServerErrorException(ErrorCode.NOTIFICATION_SEND_FAILED);
         }
     }
 }

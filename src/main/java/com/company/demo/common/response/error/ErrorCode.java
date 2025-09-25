@@ -8,7 +8,10 @@ public enum ErrorCode {
 
     UNEXPECTED(-1, "-1", "Unexpected exception occurred"),
     INVALID_INPUT_VALUE(400, "C004", "Invalid Input Value"),
-    METHOD_NOT_ALLOWED(405, "C005", "Method not allowed");
+    METHOD_NOT_ALLOWED(405, "C005", "Method not allowed"),
+
+    NOTIFICATION_SEND_FAILED(500, "C006", "[ERROR] 사용자 알림 전송에 실패했습니다."),
+    SSE_SEND_FAILED(500, "C006", "[ERROR] SSE 전송과 연결에 실패했습니다");
 
     private final int status;
     private final String code;

@@ -29,8 +29,7 @@ public class ExternalListener implements CouponEventHandler { // 외부시스템
 
             log.info("메시지 큐에 이벤트 발행 완료 - CouponId: {}", event.getCouponId());
         } catch (Exception e) {
-            log.error("메시지 큐 발행 실패 - CouponId: {}", event.getCouponId(), e);
-            // 메시지 큐에 접근하지 못하는 경우.
+            log.error("메시지 큐 발행 실패 - CouponId: {}", event.getCouponId(), e.getMessage(), e);
         }
     }
 }
