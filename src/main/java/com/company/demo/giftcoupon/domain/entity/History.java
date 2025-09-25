@@ -24,11 +24,11 @@ public class History {
     private Long userId;
 
     @Column(name = "description", nullable = true)
-    private String message;
+    private String description;
 
     public History(Long eventId, Long userId, String message) {
         this.eventId = eventId;
         this.userId = userId;
-        this.message = message;
+        this.description = message;
     }
 }

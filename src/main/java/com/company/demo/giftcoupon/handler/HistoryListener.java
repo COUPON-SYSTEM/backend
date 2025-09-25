@@ -18,6 +18,7 @@ public class HistoryListener implements CouponEventHandler {
 
     private final HistoryRepository historyRepository;
 
+
     @Override
     @Async
     public void handle(CouponIssuedEvent event) {
@@ -26,8 +27,13 @@ public class HistoryListener implements CouponEventHandler {
 
     @Transactional
     public void issuedHistorySave(CouponIssuedEvent event){
-        History history = new History(event.getCouponId(), event.getUserId(), event.getMessage());
-        historyRepository.save(history);
-        log.info("쿠폰 발급 이력이 저장되었습니다 = CouponId : {}", event.getCouponId());
+        try {
+            // TODO: 통합관리할지
+            History history = new History(event.getCouponId(), event.getUserId(), event.getMessage());
+            historyRepository.save(history);
+            log.info("쿠폰 발급 이력 저장 성공 - CouponId: {}", event.getCouponId());
+        } catch (Exception e) {
+            log.error("쿠폰 발급 이력 저장 실패 - CouponId: {}", event.getCouponId(), e.getMessage(), e);
+        }
     }
 }

@@ -10,10 +10,6 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import com.company.demo.giftcoupon.event.CouponRequestEvent;
-import io.confluent.kafka.serializers.KafkaAvroDeserializer;
-import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
-import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
-import org.apache.avro.specific.SpecificRecord;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.util.HashMap;

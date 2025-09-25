@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class) // BusinessException를 상속받은 예외처리
     public ResponseEntity<ApiResponse<?>> handleBusinessException(BusinessException e) {
-        log.error("businessException exception occurred: {}", e.getMessage(), e);
+        log.error("BusinessException exception occurred: {}", e.getMessage(), e);
 
         return newResponseEntity(e.getErrorCode().getCode(), e.getMessage(),
                 HttpStatus.BAD_REQUEST);
