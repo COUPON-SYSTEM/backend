@@ -10,10 +10,7 @@ public record CouponIssuePayload(
 ) {
     @Builder
     public static CouponIssuePayload of(String memberId, LocalDateTime issuedAt) {
-        return CouponIssuePayload.builder()
-                .memberId(memberId)
-                .issuedAt(issuedAt)
-                .build();
+        return new CouponIssuePayload(memberId, issuedAt);
     }
 }
 

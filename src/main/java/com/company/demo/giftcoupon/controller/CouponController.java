@@ -1,9 +1,9 @@
 package com.company.demo.giftcoupon.controller;
 
+import com.company.demo.giftcoupon.config.queue.CouponRequestRedisQueue;
 import com.company.demo.common.response.ApiResponse;
 import com.company.demo.common.response.error.ErrorCode;
 import com.company.demo.giftcoupon.mapper.dto.request.CouponIssueRequest;
-import com.company.demo.giftcoupon.queue.CouponRequestRedisQueue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

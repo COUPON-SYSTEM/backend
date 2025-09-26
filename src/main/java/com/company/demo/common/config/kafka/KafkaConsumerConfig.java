@@ -1,8 +1,11 @@
 package com.company.demo.common.config.kafka;
 
 import com.company.demo.giftcoupon.event.CouponIssueEvent;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,19 +13,27 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class KafkaConsumerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
     @Value("${spring.kafka.consumer.group-id}")
-    private String groupId;
+    private String groupId; // TODO: 모든 컨슈머가 같은 group-id를 사용하면 안됨
+
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     //x@Value("${spring.kafka.properties.schema.registry.url}")
     // private String schemaRegistryUrl;
@@ -31,13 +42,27 @@ public class KafkaConsumerConfig {
 
     public <T> ConsumerFactory<String, T> consumerFactory(Class<T> clazz) {
         JsonDeserializer<T> deserializer = new JsonDeserializer<>(clazz);
-        deserializer.addTrustedPackages("*");
+        deserializer.addTrustedPackages("*"); //TODO: 신뢰할 패키지 제한
 
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        // props.put(ConsumerConfig.ALLOW_AUTO_CREATE_TOPICS_CONFIG, false); - 자동 토픽 생성 방지
+
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+    }
+
+    public ConsumerFactory<String, Object> consumerFactory() {
+        JsonDeserializer<Object> deserializer = new JsonDeserializer<>(Object.class);
+        deserializer.addTrustedPackages("*"); //TODO: 신뢰할 패키지 제한
+
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
@@ -48,6 +73,60 @@ public class KafkaConsumerConfig {
         ConcurrentKafkaListenerContainerFactory<String, CouponIssueEvent> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory(CouponIssueEvent.class));
+        return factory;
+    }
+
+    // DLQ를 위한 Container Factory
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        factory.setConcurrency(3); // 병렬 처리 스레드 수
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
+
+        // DLQ 설정
+        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
+                kafkaTemplate,
+                (record, exception) -> {
+                    // DLT 토픽 이름 규칙: 원본토픽.DLT
+                    String dltTopicName = record.topic() + ".DLT";
+                    log.warn("메시지를 DLT로 전송 - 원본토픽: {}, DLT토픽: {}, 오류: {}",
+                            record.topic(), dltTopicName, exception.getMessage());
+                    return new TopicPartition(dltTopicName, 0); // 파티션 0으로 통일
+                }
+        );
+
+        // 재시도 정책: 1초 간격으로 3번 재시도
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(
+                recoverer,
+                new FixedBackOff(1000L, 3)
+        );
+
+        // 특정 예외는 재시도하지 않고 바로 DLT로 전송
+        errorHandler.addNotRetryableExceptions(
+                IllegalArgumentException.class,
+                JsonProcessingException.class
+        );
+
+        factory.setCommonErrorHandler(errorHandler);
+        return factory;
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Object> dlqListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        factory.setConcurrency(1); // DLQ는 순차 처리
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
+
+        // DLQ에서는 추가 재시도 없음 (이미 재시도를 다 한 상태)
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(
+                new FixedBackOff(0L, 0) // 재시도 없음
+        );
+
+        factory.setCommonErrorHandler(errorHandler);
         return factory;
     }
 

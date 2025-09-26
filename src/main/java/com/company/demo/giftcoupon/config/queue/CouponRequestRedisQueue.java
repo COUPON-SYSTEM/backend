@@ -1,9 +1,8 @@
-package com.company.demo.giftcoupon.queue;
+package com.company.demo.giftcoupon.config.queue;
 
 import com.company.demo.common.constant.RedisKey;
 import com.company.demo.common.response.error.ErrorCode;
 import com.company.demo.giftcoupon.exception.CouponIssueException;
-import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +37,7 @@ public class CouponRequestRedisQueue {
      * @param userId 유저 아이디
      * @return 성공 여부
      */
-    public void tryPush(String userId) {
+    public void tryPush(String userId) { // TODO: addUserToQueue 이름의 명확화, void말고 enum을 사용해서 결과 상태 반환 고려
         try {
             Long result = redisTemplate.execute(
                     pushIfUnderLimitScript,

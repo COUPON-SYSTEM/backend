@@ -1,6 +1,6 @@
 package com.company.demo.giftcoupon.consumer;
 
-import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
+import com.company.demo.common.client.CustomKafkaProducer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
