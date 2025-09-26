@@ -26,7 +26,11 @@ public class CustomKafkaConsumer {
         log.info("Received message: {}", message);
     }
 
-    @KafkaListener(topics = KafkaTopic.COUPON_ISSUE)
+    @KafkaListener(
+            topics = KafkaTopic.COUPON_ISSUE,
+            containerFactory = "couponIssueKafkaListenerContainerFactory",
+            groupId = "consumer-group1" //
+    )
     public void handleIssuanceMessage(DomainEventEnvelope<CouponIssuePayload> envelope) {
         couponIssueService.tryToIssueCoupon(TryIssueCouponCommand.from(envelope.payload().memberId(), envelope.source()));
     }
