@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "history")
 @Getter
@@ -23,12 +25,12 @@ public class History {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "description", nullable = true)
-    private String description;
+    @Column(name = "issuedAt", nullable = true)
+    private LocalDateTime issuedAt;
 
-    public History(Long eventId, Long userId, String message) {
+    public History(Long eventId, Long userId, LocalDateTime issuedAt) {
         this.eventId = eventId;
         this.userId = userId;
-        this.description = message;
+        this.issuedAt = issuedAt;
     }
 }

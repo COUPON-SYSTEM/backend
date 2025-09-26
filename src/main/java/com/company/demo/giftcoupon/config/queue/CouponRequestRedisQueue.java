@@ -37,7 +37,7 @@ public class CouponRequestRedisQueue {
      * @param userId 유저 아이디
      * @return 성공 여부
      */
-    public void tryPush(String userId) {
+    public void tryPush(String userId) { // TODO: addUserToQueue 이름의 명확화, void말고 enum을 사용해서 결과 상태 반환 고려
         try {
             Long result = redisTemplate.execute(
                     pushIfUnderLimitScript,

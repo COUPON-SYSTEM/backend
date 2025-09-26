@@ -17,7 +17,7 @@ public class CouponRequestJobScheduler {
     private final JobLauncher jobLauncher;
     private final Job couponRequestJob;
 
-    @Scheduled(fixedRate = 1000) // 1초마다 실행
+    @Scheduled(fixedRate = 5000) // 1초마다 실행
     public void runJob() {
         try {
             JobParameters jobParameters = new JobParametersBuilder()
