@@ -4,11 +4,11 @@ import lombok.Builder;
 
 import java.time.LocalDateTime;
 
+@Builder
 public record CouponIssuePayload(
         String memberId,
         LocalDateTime issuedAt
 ) {
-    @Builder
     public static CouponIssuePayload of(String memberId, LocalDateTime issuedAt) {
         return CouponIssuePayload.builder()
                 .memberId(memberId)
