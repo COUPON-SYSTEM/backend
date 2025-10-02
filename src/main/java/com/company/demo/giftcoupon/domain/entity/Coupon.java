@@ -27,14 +27,8 @@ public class Coupon {
     @Column(name = "coupon_used_at", nullable = true)
     private LocalDateTime usedAt;
 
-    @Column(name = "member_id", nullable = false)
-    private Long memberId;
-
-    @Builder(builderMethodName = "codeOnlyBuilder") // 전용 메서드
-    private Coupon(String code) {
-        this.code = code;
-    }
-
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
 //    @Enumerated(EnumType.STRING)
 //    @Column(nullable = false)

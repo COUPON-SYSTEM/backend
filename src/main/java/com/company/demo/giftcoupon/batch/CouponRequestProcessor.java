@@ -19,15 +19,15 @@ public class CouponRequestProcessor implements ItemProcessor<String, ProcessedCo
     private final CouponIssueService couponIssueService;
 
     @Override
-    public ProcessedCouponData process(String memberId) {
+    public ProcessedCouponData process(String userId) {
         // 1) 쿠폰 미리 구성 (DB 저장 금지)
-        Coupon coupon = couponIssueService.issueCoupon(memberId);
-        log.info("사용자 {}에 대한 쿠폰 생성", coupon.getMemberId());
+        Coupon coupon = couponIssueService.issueCoupon(userId);
+        log.info("사용자 {}에 대한 쿠폰 생성", coupon.getUserId());
 
         // 2) Writer에게 전달할 재료 반환
         return ProcessedCouponData.builder()
                 .coupon(coupon)
-                .event(CouponIssuedEvent.of(memberId, EventType.ISSUED_EVENT))
+                .event(CouponIssuedEvent.of(coupon.getUserId(), EventType.ISSUED_EVENT))
                 .build();
     }
 }

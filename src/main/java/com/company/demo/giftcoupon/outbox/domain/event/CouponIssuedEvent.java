@@ -15,14 +15,14 @@ import java.util.UUID;
 @Builder
 public record CouponIssuedEvent(
         String eventId,
-        String memberId,
+        Long userId,
         String eventType,
         LocalDateTime issuedAt
 ) {
-    public static CouponIssuedEvent of(String memberId, String eventType) {
+    public static CouponIssuedEvent of(Long userId, String eventType) {
         return CouponIssuedEvent.builder()
                 .eventId(UUID.randomUUID().toString())
-                .memberId(memberId)
+                .userId(userId)
                 .eventType(eventType)
                 .issuedAt(LocalDateTime.now())
                 .build();
@@ -34,7 +34,7 @@ public record CouponIssuedEvent(
                 this.eventId,
                 this.eventType,
                 source,
-                CouponIssuedPayload.of(this.memberId, couponId, this.issuedAt)
+                CouponIssuedPayload.of(this.userId, couponId, this.issuedAt)
         );
     }
 }

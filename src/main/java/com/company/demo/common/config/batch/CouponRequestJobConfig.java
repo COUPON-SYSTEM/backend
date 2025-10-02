@@ -3,7 +3,6 @@ package com.company.demo.common.config.batch;
 import com.company.demo.giftcoupon.batch.CouponRequestProcessor;
 import com.company.demo.giftcoupon.batch.KafkaCouponWriter;
 import com.company.demo.giftcoupon.batch.ProcessedCouponData;
-import com.company.demo.giftcoupon.event.CouponIssueEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;

@@ -7,5 +7,5 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 public class CouponIssueRequest {
-    private Long memberId;
+    private Long userId;
 }
