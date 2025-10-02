@@ -30,7 +30,7 @@ public class KafkaCouponWriter implements ItemWriter<ProcessedCouponData> {
                     data.event().toEnvelope(Source.COUPON_ISSUED, data.coupon().getId());
 
             applicationEventPublisher.publishEvent(envelope);
-            log.info("쿠폰 발급 이벤트(envelope) 발행 완료. memberId={}, couponId={}", data.coupon().getMemberId(), data.coupon().getId());
+            log.info("쿠폰 발급 이벤트(envelope) 발행 완료. userId={}, couponId={}", data.coupon().getUserId(), data.coupon().getId());
         }
     }
 }

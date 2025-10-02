@@ -26,16 +26,16 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class CouponIssueService {
-    private final UserRepository memberRepository;
+    private final UserRepository userRepository;
 
     public Coupon issueCoupon(final String userId) {
-//        if(!memberRepository.existsById(command.memberId())){
+//        if(!userRepository.existsById(Long.valueOf(userId))){
 //            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
 //        }
 
         return Coupon.builder()
-                .memberId(Long.valueOf(userId))
-                .code(Source.COUPON_ISSUED)
+                .userId(Long.valueOf(userId))
+                .code("안녕하세요")
                 .build();
     }
 }
