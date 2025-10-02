@@ -17,7 +17,7 @@ public class CustomKafkaProducer {
     // KafkaTemplate Bean을 주입해 MyKafkaProducer 객체 생성
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final KafkaTemplate<String, DomainEventEnvelope<CouponIssuePayload>> giftKafkaTemplate;
-    private final KafkaTemplate<String, DomainEventEnvelope<CouponIssuedPayload>> issueKafkaTemplate;
+    private final KafkaTemplate<String, DomainEventEnvelope<CouponIssuedPayload>> issuedKafkaTemplate;
 
     public void sendMessage(String topic, String message) {
         kafkaTemplate.send(topic, message);
@@ -29,7 +29,7 @@ public class CustomKafkaProducer {
     }
 
     public void sendIssuedMessage(DomainEventEnvelope<CouponIssuedPayload> envelope) {
-        issueKafkaTemplate.send(KafkaTopic.COUPON_ISSUED, envelope);
+        issuedKafkaTemplate.send(KafkaTopic.COUPON_ISSUED, envelope);
     }
 
 /*
