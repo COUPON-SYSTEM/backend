@@ -1,33 +1,36 @@
 package com.company.demo.giftcoupon.batch;
 
-import com.company.demo.common.constant.RedisKey;
 import com.company.demo.common.constant.Source;
-import com.company.demo.giftcoupon.event.CouponIssueEvent;
-import com.company.demo.giftcoupon.event.CouponIssuePayload;
+import com.company.demo.giftcoupon.domain.repository.CouponRepository;
+import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
-import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-public class KafkaCouponWriter implements ItemWriter<CouponIssueEvent> {
+public class KafkaCouponWriter implements ItemWriter<ProcessedCouponData> {
 
-    private final CustomKafkaProducer kafkaProducer;
-    private final RedisTemplate<String, String> redisTemplate;
+    private final CouponRepository couponRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
-    public void write(Chunk<? extends CouponIssueEvent> items) {
-        for (CouponIssueEvent event : items) {
-            DomainEventEnvelope<CouponIssuePayload> envelope = event.toEnvelope(Source.COUPON_ISSUE);
-            kafkaProducer.sendRequestMessage(envelope);
-        }
+    public void write(Chunk<? extends ProcessedCouponData> items) {
+        for (ProcessedCouponData data : items) {
+            // 1) 쿠폰 저장 -> couponId 확보
+            couponRepository.save(data.coupon());
 
-        // Kafka 메시지 전송이 끝난 뒤 누적 발급 수 증가
-        // 즉, 쿠폰 발행했다라는 것을 Kafka 메시지 발행을 기준으로 함
-        redisTemplate.opsForValue().increment(RedisKey.COUPON_REQUEST_COUNT_KEY, items.size());
+            // 2) 엔벨로프 "최종" 구성 (couponId 포함)
+            DomainEventEnvelope<CouponIssuedPayload> envelope =
+                    data.event().toEnvelope(Source.COUPON_ISSUED, data.coupon().getId());
+
+            applicationEventPublisher.publishEvent(envelope);
+            log.info("쿠폰 발급 이벤트(envelope) 발행 완료. memberId={}, couponId={}", data.coupon().getMemberId(), data.coupon().getId());
+        }
     }
 }

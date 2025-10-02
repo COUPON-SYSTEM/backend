@@ -3,17 +3,12 @@ package com.company.demo.giftcoupon.batch;
 import com.company.demo.common.constant.EventType;
 import com.company.demo.common.constant.Source;
 import com.company.demo.giftcoupon.domain.entity.Coupon;
-import com.company.demo.giftcoupon.event.CouponIssueEvent;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedEvent;
-import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
-import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.batch.item.ItemProcessor;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -27,6 +22,7 @@ public class CouponRequestProcessor implements ItemProcessor<String, ProcessedCo
                 .memberId(Long.valueOf(memberId))
                 .code(Source.COUPON_ISSUED)
                 .build();
+        log.info("사용자 {}에 대한 쿠폰 생성", memberId);
 
         // 2) Writer에게 전달할 재료 반환
         return ProcessedCouponData.builder()
