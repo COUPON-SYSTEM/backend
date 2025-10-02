@@ -24,16 +24,16 @@ public class CouponRequestJobConfig {
     private final PlatformTransactionManager transactionManager;
 
     @Bean
-    public Job couponRequestJob() {
+    public Job couponIssueJob() {
         return new JobBuilder("couponIssueJob", jobRepository)
-                .start(couponRequestStep())
+                .start(couponIssueStep())
                 .build();
     }
 
     @Bean
-    public Step couponRequestStep() {
+    public Step couponIssueStep() {
         return new StepBuilder("couponIssueStep", jobRepository)
-                .<String, CouponIssueEvent>chunk(10, transactionManager)
+                .<String, CouponIssuedEvent>chunk(10, transactionManager)
                 .reader(redisCouponReader)
                 .processor(couponRequestProcessor)
                 .writer(kafkaCouponWriter)
