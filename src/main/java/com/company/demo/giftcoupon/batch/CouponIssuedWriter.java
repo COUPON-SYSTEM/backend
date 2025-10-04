@@ -17,7 +17,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class KafkaCouponWriter implements ItemWriter<ProcessedCouponData> {
+public class CouponIssuedWriter implements ItemWriter<ProcessedCouponData> {
 
     private final CouponRepository couponRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
