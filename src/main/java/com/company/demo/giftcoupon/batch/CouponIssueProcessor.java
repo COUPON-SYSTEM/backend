@@ -1,7 +1,6 @@
 package com.company.demo.giftcoupon.batch;
 
 import com.company.demo.common.constant.EventType;
-import com.company.demo.common.constant.Source;
 import com.company.demo.giftcoupon.domain.entity.Coupon;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedEvent;
 import com.company.demo.giftcoupon.sevice.CouponIssueService;
@@ -14,7 +13,7 @@ import org.springframework.batch.item.ItemProcessor;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CouponRequestProcessor implements ItemProcessor<String, ProcessedCouponData> {
+public class CouponIssueProcessor implements ItemProcessor<String, ProcessedCouponData> {
 
     private final CouponIssueService couponIssueService;
 
