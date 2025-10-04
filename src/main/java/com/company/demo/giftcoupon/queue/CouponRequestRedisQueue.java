@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.Collections;
 
-// 요청을 Redis에서 10개씩 뽑아오는 Component
 @Slf4j
 @Component
 @RequiredArgsConstructor
