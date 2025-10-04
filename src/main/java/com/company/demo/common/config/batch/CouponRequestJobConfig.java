@@ -22,6 +22,7 @@ public class CouponRequestJobConfig {
     private final KafkaCouponWriter kafkaCouponWriter;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
+    private final PlatformTransactionManager jpaTransactionManager;
 
     @Bean
     public Job couponIssueJob() {
@@ -33,10 +34,14 @@ public class CouponRequestJobConfig {
     @Bean
     public Step couponIssueStep() {
         return new StepBuilder("couponIssueStep", jobRepository)
-                .<String, ProcessedCouponData>chunk(10, transactionManager)
+                .<String, ProcessedCouponData>chunk(1, jpaTransactionManager)
                 .reader(redisCouponReader)
                 .processor(couponRequestProcessor)
                 .writer(kafkaCouponWriter)
+                .faultTolerant()
+                .skip(Exception.class)
+                .skipLimit(10)
+                // .transactionManager(jpaTransactionManager)
                 .build();
     }
 }

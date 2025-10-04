@@ -5,12 +5,14 @@ import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
 import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CouponIssuedEventMessageListener{
@@ -21,5 +23,6 @@ public class CouponIssuedEventMessageListener{
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void sendMessageHandler(DomainEventEnvelope<CouponIssuedPayload> envelope) {
         customKafkaProducer.sendIssuedMessage(envelope);
+        log.info("카프카에 메세지 전송 완료!");
     }
 }

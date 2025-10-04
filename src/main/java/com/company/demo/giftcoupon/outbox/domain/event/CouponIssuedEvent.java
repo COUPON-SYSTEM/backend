@@ -1,7 +1,6 @@
 package com.company.demo.giftcoupon.outbox.domain.event;
 
 import lombok.Builder;
-import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -11,7 +10,6 @@ import java.util.UUID;
  * 불변객체를 만들기 위해서는 보일러플레이트가 필요합니다.
  * Spring 4.2 이후부터는 @EventListener가 record 타입을 인식할 수 있습니다.
  */
-@Getter
 @Builder
 public record CouponIssuedEvent(
         String eventId,
