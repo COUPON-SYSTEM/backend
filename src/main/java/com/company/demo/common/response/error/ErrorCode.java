@@ -12,8 +12,8 @@ public enum ErrorCode {
     COUPON_ISSUANCE_CLOSED(429, "C006", "Coupon Issuance is closed"),
     COUPON_REDIS_FAILED(500, "C007", "Coupon Issuance Redis result is invalid"),
     REDIS_CONNECTION_FAILED(501, "C008", "Redis connection failed"),
-    COUPON_SERIALIZATION_FAILED(500, "C009", "Outbox event failed serialization");
-
+    COUPON_SERIALIZATION_FAILED(500, "C009", "Outbox event failed serialization"),
+    DUPLICATE_USER_REQUEST(502, "C010", "User is duplicated");
 
     private final int status;
     private final String code;
