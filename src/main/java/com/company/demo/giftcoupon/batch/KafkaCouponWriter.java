@@ -11,6 +11,7 @@ import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Slf4j
@@ -26,19 +27,31 @@ public class KafkaCouponWriter implements ItemWriter<ProcessedCouponData> {
     public void write(Chunk<? extends ProcessedCouponData> items) {
         log.info("writer 호출! chunkSize={}", items.size());
         for (ProcessedCouponData data : items) {
-            // 1) 쿠폰 저장 -> couponId 확보
-            couponRepository.save(data.coupon());
-            log.info("쿠폰 ID {} 저장 완료.", data.coupon().getId());
+            try {
+                log.info("[1] before save, userId={}", data.coupon().getUserId());
+                couponRepository.save(data.coupon());               // ← 여기서 터지거나 막힐 가능성 높음
+                log.info("[2] after save, couponId={}", data.coupon().getId());
 
-            // 2) 엔벨로프 "최종" 구성 (couponId 포함)
-            DomainEventEnvelope<CouponIssuedPayload> envelope =
-                    data.event().toEnvelope(Source.COUPON_ISSUED, data.coupon().getId());
+                DomainEventEnvelope<CouponIssuedPayload> envelope =
+                        data.event().toEnvelope(Source.COUPON_ISSUED, data.coupon().getId());
+                log.info("[3] after envelope build: eventId={}", envelope.eventId());
 
+                eventRecorder.record(envelope);
+                log.info("[4] after outbox record");
 
-            eventRecorder.record(envelope);
-            applicationEventPublisher.publishEvent(envelope);
-            log.info("tx active? {}", TransactionSynchronizationManager.isActualTransactionActive());
-            log.info("쿠폰 발급 이벤트(envelope) 발행 완료. userId={}, couponId={}", data.coupon().getUserId(), data.coupon().getId());
+                // 커밋 확정 후만 발행되게 하는 게 더 안전
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                    @Override public void afterCommit() {
+                        applicationEventPublisher.publishEvent(envelope);
+                        log.info("[5] AFTER_COMMIT publish done");
+                    }
+                });
+
+                log.info("tx active? {}", TransactionSynchronizationManager.isActualTransactionActive());
+            } catch (Exception e) {
+                log.error("writer loop error: {}", e.toString(), e);
+                throw e; // skip 정책이 있다면 여기서 스킵으로 넘어감
+            }
         }
     }
 }
