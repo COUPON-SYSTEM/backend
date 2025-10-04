@@ -32,7 +32,7 @@ public class KafkaProducerConfig {
     }
 
     /** 공통 기본 설정 */
-    private Map<String, Object> baseProducerConfig() {
+    private Map<String, Object> baseProducerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
         props.put(ProducerConfig.ACKS_CONFIG, "all");
@@ -43,10 +43,22 @@ public class KafkaProducerConfig {
         return props;
     }
 
+    /** Test 용 팩토리 */
+    @Bean
+    public ProducerFactory<String, String> producerFactory() {
+        return new DefaultKafkaProducerFactory<>(baseProducerConfigs());
+    }
+
+    // 실제로 Kafka에 메시지를 전송하는 데 사용하는 스프링 추상화 객체: KafkaTemplates
+    @Bean
+    public KafkaTemplate<String, String> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
+    }
+
     /** String -> DomainEventEnvelope<CouponIssuedPayload> 용 */
     @Bean
     public ProducerFactory<String, DomainEventEnvelope<CouponIssuedPayload>> couponIssuedProducerFactory() {
-        return new DefaultKafkaProducerFactory<>(baseProducerConfig());
+        return new DefaultKafkaProducerFactory<>(baseProducerConfigs());
     }
 
     @Bean
