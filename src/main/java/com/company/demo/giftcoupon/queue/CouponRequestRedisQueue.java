@@ -43,12 +43,12 @@ public class CouponRequestRedisQueue {
             Long result = redisTemplate.execute(
                     pushIfUnderLimitScript,
                     Arrays.asList(
-                            RedisKey.COUPON_REQUEST_QUEUE_KEY,     // 큐
-                            RedisKey.COUPON_TOTAL_COUNT_KEY,       // 누적 발급 카운터
-                            RedisKey.COUPON_USER_GUARD_PREFIX      // 예: "coupon:user:"
+                            RedisKey.COUPON_REQUEST_QUEUE_KEY,   // KEYS[1]
+                            RedisKey.COUPON_TOTAL_COUNT_KEY,     // KEYS[2]
+                            RedisKey.COUPON_USER_GUARD_PREFIX    // KEYS[3]
                     ),
-                    String.valueOf(MAX_QUEUE_SIZE),                      // 누적 최대 수
-                    userId
+                    String.valueOf(100),                    // ARGV[1]: maxTotal
+                    String.valueOf(userId)                 // ARGV[2]: ★ 반드시 실제 userId 문자열 ★
             );
 
             // Lua 스크립트 반환값에 따라 분기
