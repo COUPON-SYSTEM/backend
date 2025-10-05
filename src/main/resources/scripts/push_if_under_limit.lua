@@ -3,7 +3,6 @@
 -- KEYS[3] = userKeyPrefix (유저 중복 방지 키 prefix)
 -- ARGV[1] = maxTotalCount (예: 100)
 -- ARGV[2] = userId
--- ARGV[3] = userGuardTtlSeconds (0이면 TTL 없음)
 
 -- 유저 중복 키 생성
 local userKey = KEYS[3] .. ARGV[2]

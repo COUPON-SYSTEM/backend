@@ -47,9 +47,24 @@ public class CouponRequestRedisQueue {
                             RedisKey.COUPON_TOTAL_COUNT_KEY,     // KEYS[2]
                             RedisKey.COUPON_USER_GUARD_PREFIX    // KEYS[3]
                     ),
-                    String.valueOf(100),                    // ARGV[1]: maxTotal
+                    String.valueOf(MAX_QUEUE_SIZE),                    // ARGV[1]: maxTotal
                     String.valueOf(userId)                 // ARGV[2]: ★ 반드시 실제 userId 문자열 ★
             );
+            log.info("Lua KEYS={}, ARGV={}",
+                    Arrays.asList(
+                            RedisKey.COUPON_REQUEST_QUEUE_KEY,
+                            RedisKey.COUPON_TOTAL_COUNT_KEY,
+                            RedisKey.COUPON_USER_GUARD_PREFIX),
+                    Arrays.asList(
+                            String.valueOf(MAX_QUEUE_SIZE),
+                            String.valueOf(userId)));
+
+            log.info("Lua result={}", result);
+
+            Long qlen = redisTemplate.opsForList().size("coupon:request:queue");
+            String cnt = redisTemplate.opsForValue().get("coupon:request:count");
+            String guard = redisTemplate.opsForValue().get("coupon:user:" + userId);
+            log.info("AFTER => r={}, LLEN={}, CNT={}, GUARD({})={}", result, qlen, cnt, userId, guard);
 
             // Lua 스크립트 반환값에 따라 분기
             if (Long.valueOf(1).equals(result)) {
@@ -69,5 +84,6 @@ public class CouponRequestRedisQueue {
             log.error("Redis operation failed", e);
             throw new CouponIssueException(ErrorCode.REDIS_CONNECTION_FAILED);
         }
+
     }
 }
