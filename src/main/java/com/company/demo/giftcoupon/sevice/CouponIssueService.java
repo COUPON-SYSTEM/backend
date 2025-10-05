@@ -1,5 +1,6 @@
 package com.company.demo.giftcoupon.sevice;
 
+import com.company.demo.common.constant.EventType;
 import com.company.demo.giftcoupon.domain.entity.Coupon;
 import com.company.demo.giftcoupon.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class CouponIssueService {
         return Coupon.builder()
                 .userId(Long.valueOf(userId))
                 .code("안녕하세요")
+                .eventType(EventType.ISSUED_EVENT)
                 .build();
     }
 }

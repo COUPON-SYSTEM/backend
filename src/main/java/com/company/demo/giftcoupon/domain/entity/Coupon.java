@@ -30,6 +30,9 @@ public class Coupon {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(name = "event_type", nullable = true)
+    private String eventType;
+
 //    @Enumerated(EnumType.STRING)
 //    @Column(nullable = false)
 //    private Status status;

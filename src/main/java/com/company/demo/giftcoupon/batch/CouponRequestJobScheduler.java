@@ -1,5 +1,6 @@
 package com.company.demo.giftcoupon.batch;
 
+import com.company.demo.common.constant.EventType;
 import com.company.demo.common.constant.RedisKey;
 import com.company.demo.giftcoupon.domain.repository.CouponRepository;
 import jakarta.annotation.PostConstruct;
@@ -11,7 +12,6 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +31,7 @@ public class CouponRequestJobScheduler {
     private final Job couponRequestJob;
     private final RedisTemplate<String, String> redisTemplate;
     private final ThreadPoolTaskScheduler couponTaskScheduler;
+    private final CouponRepository couponRepository;
 
     private volatile ScheduledFuture<?> future;
 
@@ -52,18 +53,17 @@ public class CouponRequestJobScheduler {
     /** 한 번의 주기 동작 */
     private void tick() {
         try {
-            // 1) 누적 한도 체크: 100개 이상이면 스케줄 자체 중단
-            long total = getTotalCount();
-            if (total >= MAX_TOTAL) {
-                log.info("[CouponScheduler] total={} reached MAX_TOTAL={}, cancel scheduling.", total, MAX_TOTAL);
-                cancel();
-                return;
-            }
-
-            // 2) 큐 비어 있으면 실행 스킵
+            long issued = couponRepository.countIssuedByEventType(EventType.ISSUED_EVENT);
             long len = Optional.ofNullable(
                     redisTemplate.opsForList().size(RedisKey.COUPON_REQUEST_QUEUE_KEY)
             ).orElse(0L);
+
+            // 1) 발급 100개 달성 + 큐 비었으면 중단
+            if (issued >= MAX_TOTAL && len == 0L) {
+                log.info("[CouponScheduler] issued={}, queue={}, stop.", issued, len);
+                cancel();
+                return;
+            }
 
             if (len == 0L) {
                 log.debug("[CouponScheduler] queue empty. skip running job.");
