@@ -33,7 +33,6 @@ public class CouponRequestJobScheduler {
     private final ThreadPoolTaskScheduler couponTaskScheduler;
     private final CouponRepository couponRepository;
 
-<<<<<<< HEAD
     private volatile ScheduledFuture<?> future;
 
     /** 애플리케이션 기동 시 스케줄 등록 */
@@ -53,10 +52,6 @@ public class CouponRequestJobScheduler {
 
     /** 한 번의 주기 동작 */
     private void tick() {
-=======
-    @Scheduled(fixedRate = 5000) // 1초마다 실행
-    public void runJob() {
->>>>>>> origin
         try {
             long issued = couponRepository.countIssuedByEventType(EventType.ISSUED_EVENT);
             long len = Optional.ofNullable(

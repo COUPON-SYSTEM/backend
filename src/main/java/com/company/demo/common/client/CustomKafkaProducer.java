@@ -14,15 +14,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomKafkaProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
-<<<<<<< HEAD:src/main/java/com/company/demo/giftcoupon/producer/CustomKafkaProducer.java
     private final KafkaTemplate<String, DomainEventEnvelope<CouponIssuedPayload>> issuedKafkaTemplate;
-=======
+
     @Qualifier("giftCouponKafkaTemplate")
     private final KafkaTemplate<String, Object> giftKafkaTemplate;
 
     @Qualifier("giftCouponKafkaTemplate")
     private final KafkaTemplate<String, Object> issueKafkaTemplate;
->>>>>>> origin:src/main/java/com/company/demo/common/client/CustomKafkaProducer.java
 
     public void sendMessage(String topic, String message) {
         kafkaTemplate.send(topic, message);
