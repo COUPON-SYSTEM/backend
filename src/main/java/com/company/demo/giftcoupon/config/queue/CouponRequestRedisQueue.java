@@ -12,9 +12,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.Collections;
 
-// 요청을 Redis에서 10개씩 뽑아오는 Component
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -41,9 +41,29 @@ public class CouponRequestRedisQueue {
         try {
             Long result = redisTemplate.execute(
                     pushIfUnderLimitScript,
-                    Collections.singletonList(RedisKey.COUPON_REQUEST_QUEUE_KEY),
-                    String.valueOf(MAX_QUEUE_SIZE), userId
+                    Arrays.asList(
+                            RedisKey.COUPON_REQUEST_QUEUE_KEY,   // KEYS[1]
+                            RedisKey.COUPON_TOTAL_COUNT_KEY,     // KEYS[2]
+                            RedisKey.COUPON_USER_GUARD_PREFIX    // KEYS[3]
+                    ),
+                    String.valueOf(MAX_QUEUE_SIZE),                    // ARGV[1]: maxTotal
+                    String.valueOf(userId)                 // ARGV[2]: ★ 반드시 실제 userId 문자열 ★
             );
+            log.info("Lua KEYS={}, ARGV={}",
+                    Arrays.asList(
+                            RedisKey.COUPON_REQUEST_QUEUE_KEY,
+                            RedisKey.COUPON_TOTAL_COUNT_KEY,
+                            RedisKey.COUPON_USER_GUARD_PREFIX),
+                    Arrays.asList(
+                            String.valueOf(MAX_QUEUE_SIZE),
+                            String.valueOf(userId)));
+
+            log.info("Lua result={}", result);
+
+            Long qlen = redisTemplate.opsForList().size("coupon:request:queue");
+            String cnt = redisTemplate.opsForValue().get("coupon:request:count");
+            String guard = redisTemplate.opsForValue().get("coupon:user:" + userId);
+            log.info("AFTER => r={}, LLEN={}, CNT={}, GUARD({})={}", result, qlen, cnt, userId, guard);
 
             // Lua 스크립트 반환값에 따라 분기
             if (Long.valueOf(1).equals(result)) {
@@ -51,6 +71,8 @@ public class CouponRequestRedisQueue {
             } else if (Long.valueOf(0).equals(result)) {
                 // 100개 초과로 인해 push 실패한 경우
                 throw new CouponIssueException(ErrorCode.COUPON_ISSUANCE_CLOSED);
+            } else if (Long.valueOf(-1).equals(result)) {
+                throw new CouponIssueException(ErrorCode.DUPLICATE_USER_REQUEST); // 중복 유저
             } else {
                 // Lua 스크립트가 예상치 못한 값을 반환한 경우
                 log.error("Unexpected script result: {}", result);
@@ -61,5 +83,6 @@ public class CouponRequestRedisQueue {
             log.error("Redis operation failed", e);
             throw new CouponIssueException(ErrorCode.REDIS_CONNECTION_FAILED);
         }
+
     }
 }

@@ -5,15 +5,15 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+@Builder
 public record CouponIssuedPayload(
-        Long memberId,
+        Long userId,
         Long couponId,
         LocalDateTime issuedAt
 ) {
-    @Builder
-    public static CouponIssuedPayload of(Long memberId, Long couponId, LocalDateTime issuedAt) {
+    public static CouponIssuedPayload of(Long userId, Long couponId, LocalDateTime issuedAt) {
         return CouponIssuedPayload.builder()
-                .memberId(memberId)
+                .userId(userId)
                 .couponId(couponId)
                 .issuedAt(issuedAt)
                 .build();

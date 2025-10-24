@@ -25,6 +25,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'com.fasterxml.jackson.module:jackson-module-parameter-names'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
@@ -49,11 +50,15 @@ dependencies {
 	// batch
 	implementation 'org.springframework.boot:spring-boot-starter-batch'
 
+	// Prometheus
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
 	// email
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
 	// RabbitMQ와 AMQP를 위한 의존성 추가
 	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
 }
 
 tasks.named('test') {
