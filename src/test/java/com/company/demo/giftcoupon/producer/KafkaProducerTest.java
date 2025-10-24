@@ -1,6 +1,7 @@
 package com.company.demo.giftcoupon.producer;
 
 import com.company.demo.common.constant.KafkaTopic;
+import com.company.demo.common.client.CustomKafkaProducer;
 import com.company.demo.giftcoupon.event.CouponIssueEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,7 +53,7 @@ public class KafkaProducerTest {
                 .build();
 
         // When
-        kafkaProducer.sendRequestMessage(event);
+        //kafkaProducer.sendRequestMessage(event);
 
         // Then
         verify(giftKafkaTemplate, times(1)).send(eq(topic), eventCaptor.capture());

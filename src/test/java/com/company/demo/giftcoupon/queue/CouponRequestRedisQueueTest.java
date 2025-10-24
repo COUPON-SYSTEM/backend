@@ -1,5 +1,6 @@
 package com.company.demo.giftcoupon.queue;
 
+import com.company.demo.giftcoupon.config.queue.CouponRequestRedisQueue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

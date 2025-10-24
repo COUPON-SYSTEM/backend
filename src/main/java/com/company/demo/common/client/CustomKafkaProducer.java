@@ -1,10 +1,11 @@
-package com.company.demo.giftcoupon.producer;
+package com.company.demo.common.client;
 
 import com.company.demo.common.constant.KafkaTopic;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomKafkaProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
+<<<<<<< HEAD:src/main/java/com/company/demo/giftcoupon/producer/CustomKafkaProducer.java
     private final KafkaTemplate<String, DomainEventEnvelope<CouponIssuedPayload>> issuedKafkaTemplate;
+=======
+    @Qualifier("giftCouponKafkaTemplate")
+    private final KafkaTemplate<String, Object> giftKafkaTemplate;
+
+    @Qualifier("giftCouponKafkaTemplate")
+    private final KafkaTemplate<String, Object> issueKafkaTemplate;
+>>>>>>> origin:src/main/java/com/company/demo/common/client/CustomKafkaProducer.java
 
     public void sendMessage(String topic, String message) {
         kafkaTemplate.send(topic, message);
