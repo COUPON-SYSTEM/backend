@@ -1,6 +1,7 @@
 package com.company.demo.common.config.kafka;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -19,52 +20,54 @@ import java.util.Map;
 @Slf4j
 @Configuration
 public class KafkaProducerConfig {
-
     @Value("${spring.kafka.bootstrap-servers}")
     private String BOOTSTRAP_SERVERS;
 
-    private static final String SCHEMA_REGISTRY_URL = "http://localhost:8081";
-
-    @PostConstruct
-    public void checkBootstrapServers() {
-        log.info("BOOTSTRAP_SERVERS from config: {}", BOOTSTRAP_SERVERS);
-    }
-
-
-    // 동적 생성을 가정하여 설정
-    // Kafka 프로듀서 인스턴스(KafkaTemplate)를 생성하는 팩토리 객체
-    private <T> ProducerFactory<String, T> producerFactory(Class<T> clazz) {
+    // 1. 기본 프로듀서 설정 맵 생성
+    private Map<String, Object> baseProducerProps() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
-//        props.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.ACKS_CONFIG, "all");
+        props.put(ProducerConfig.RETRIES_CONFIG, 10);
+        props.put(ProducerConfig.LINGER_MS_CONFIG, 1);
+        return props;
+    }
+
+    // 2. String 타입을 위한 ProducerFactory (JSON 직렬화가 필요 없으므로 StringSerializer 사용 가능)
+    @Bean
+    public ProducerFactory<String, String> stringProducerFactory() {
+        Map<String, Object> props = baseProducerProps();
+        // String은 단순 문자열이므로 JsonSerializer 대신 StringSerializer 사용이 효율적
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        return new DefaultKafkaProducerFactory<>(props);
+    }
+
+    // 3. Object(Event) 타입을 위한 ProducerFactory (JsonSerializer 사용)
+    @Bean
+    public ProducerFactory<String, Object> jsonProducerFactory() {
+        Map<String, Object> props = baseProducerProps();
+
+        // **JsonSerializer를 명시적으로 사용하고 설정을 추가하여 타입 정보를 제공합니다.**
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-//        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
-        props.put(ProducerConfig.ACKS_CONFIG, "all");  // 안정성 향상 (메세지 전송 확인 수준 설정)
-        props.put(ProducerConfig.RETRIES_CONFIG, 10);  // 실패 시 재시도 횟수 설정
-        props.put(ProducerConfig.LINGER_MS_CONFIG, 1); //  "얼마나 기다렸다가" 배치로 전송할지를 결정하는 지연 시간(ms 단위)
+        // 컨슈머가 역직렬화할 때 필요한 정보를 헤더에 넣지 않도록 설정 (선택적)
+        // props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
 
         return new DefaultKafkaProducerFactory<>(props);
     }
 
-    // 실제로 Kafka에 메시지를 전송하는 데 사용하는 스프링 추상화 객체: KafkaTemplates
+    // --- KafkaTemplate 빈 정의 ---
+
     @Bean
-    public KafkaTemplate<String, String> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory(String.class));
+    @Qualifier("stringKafkaTemplate")
+    public KafkaTemplate<String, String> stringKafkaTemplate() { // 이름 변경으로 명확성 증가
+        return new KafkaTemplate<>(stringProducerFactory());
     }
 
     @Bean
-    public KafkaTemplate<String, CouponIssueEvent> giftKafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory(CouponIssueEvent.class));
+    @Qualifier("giftCouponKafkaTemplate")
+    public KafkaTemplate<String, Object> giftCouponKafkaTemplate() {
+        // Object 타입을 처리하는 jsonProducerFactory를 사용
+        return new KafkaTemplate<>(jsonProducerFactory(), true);
     }
-
-//    @Bean
-//    public KafkaTemplate<String, CouponIssuedEvent> couponKafkaTemplate() {
-//        return new KafkaTemplate<>(producerFactory(CouponIssuedEvent.class));
-//    }
-//
-//    @Bean
-//    public KafkaTemplate<String, NotificationEvent> notificationKafkaTemplate() {
-//        return new KafkaTemplate<>(producerFactory(NotificationEvent.class));
-//    }
 }
