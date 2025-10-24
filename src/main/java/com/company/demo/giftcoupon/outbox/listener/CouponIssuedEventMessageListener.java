@@ -1,9 +1,9 @@
 package com.company.demo.giftcoupon.outbox.listener;
 
+import com.company.demo.common.client.CustomKafkaProducer;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedEvent;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
-import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
