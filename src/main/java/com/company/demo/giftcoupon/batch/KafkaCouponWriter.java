@@ -1,11 +1,11 @@
 package com.company.demo.giftcoupon.batch;
 
 import com.company.demo.common.constant.RedisKey;
+import com.company.demo.common.client.CustomKafkaProducer;
 import com.company.demo.common.constant.Source;
 import com.company.demo.giftcoupon.event.CouponIssueEvent;
 import com.company.demo.giftcoupon.event.CouponIssuePayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
-import com.company.demo.giftcoupon.producer.CustomKafkaProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
