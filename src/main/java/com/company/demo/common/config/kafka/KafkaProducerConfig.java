@@ -3,6 +3,7 @@ package com.company.demo.common.config.kafka;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -64,5 +65,42 @@ public class KafkaProducerConfig {
     @Bean
     public KafkaTemplate<String, DomainEventEnvelope<CouponIssuedPayload>> issuedKafkaTemplate() {
         return new KafkaTemplate<>(couponIssuedProducerFactory());
+    }
+
+    // 2. String 타입을 위한 ProducerFactory (JSON 직렬화가 필요 없으므로 StringSerializer 사용 가능)
+    @Bean
+    public ProducerFactory<String, String> stringProducerFactory() {
+        Map<String, Object> props = baseProducerConfigs();
+        // String은 단순 문자열이므로 JsonSerializer 대신 StringSerializer 사용이 효율적
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        return new DefaultKafkaProducerFactory<>(props);
+    }
+
+    // 3. Object(Event) 타입을 위한 ProducerFactory (JsonSerializer 사용)
+    @Bean
+    public ProducerFactory<String, Object> jsonProducerFactory() {
+        Map<String, Object> props = baseProducerConfigs();
+
+        // **JsonSerializer를 명시적으로 사용하고 설정을 추가하여 타입 정보를 제공합니다.**
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        // 컨슈머가 역직렬화할 때 필요한 정보를 헤더에 넣지 않도록 설정 (선택적)
+        // props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
+
+        return new DefaultKafkaProducerFactory<>(props);
+    }
+
+    // --- KafkaTemplate 빈 정의 ---
+
+    @Bean
+    @Qualifier("stringKafkaTemplate")
+    public KafkaTemplate<String, String> stringKafkaTemplate() { // 이름 변경으로 명확성 증가
+        return new KafkaTemplate<>(stringProducerFactory());
+    }
+
+    @Bean
+    @Qualifier("giftCouponKafkaTemplate")
+    public KafkaTemplate<String, Object> giftCouponKafkaTemplate() {
+        // Object 타입을 처리하는 jsonProducerFactory를 사용
+        return new KafkaTemplate<>(jsonProducerFactory(), true);
     }
 }
