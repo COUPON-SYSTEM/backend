@@ -24,7 +24,7 @@ public class ExternalListener implements CouponEventHandler { // 외부시스템
     @KafkaListener(
             topics = KafkaTopic.COUPON_ISSUED,
             groupId = GroupType.EXTERNAL,
-            containerFactory = "kafkaListenerContainerFactory"
+            containerFactory = "couponIssueKafkaListenerContainerFactory"
     )
     public void handle(DomainEventEnvelope<CouponIssuedPayload> envelope) {
         externalNotification(envelope);

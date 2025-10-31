@@ -28,7 +28,7 @@ public class HistoryListener implements CouponEventHandler {
     @KafkaListener(
             topics = KafkaTopic.COUPON_ISSUED,
             groupId = GroupType.HISTORY,
-            containerFactory = "kafkaListenerContainerFactory"
+            containerFactory = "couponIssueKafkaListenerContainerFactory"
     )
     public void handle(DomainEventEnvelope<CouponIssuedPayload> envelope) {
         issuedHistorySave(envelope);
