@@ -9,6 +9,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
@@ -46,7 +47,7 @@ public class RedisConfig {
 
     // serializer 설정으로 redis-cli를 통해 직접 데이터를 조회할 수 있도록 설정
     @Bean
-    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory cf) {
+    public RedisTemplate<String, String> stringRedisTemplate(RedisConnectionFactory cf) {
         RedisTemplate<String, String> t = new RedisTemplate<>();
         t.setConnectionFactory(cf);
         StringRedisSerializer s = new StringRedisSerializer();
@@ -54,6 +55,27 @@ public class RedisConfig {
         t.setValueSerializer(s);
         t.setHashKeySerializer(s);
         t.setHashValueSerializer(s);
+        t.afterPropertiesSet();
+        return t;
+    }
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory cf) {
+        RedisTemplate<String, Object> t = new RedisTemplate<>();
+        t.setConnectionFactory(cf);
+
+        StringRedisSerializer stringSerializer = new StringRedisSerializer();
+        // Object 저장을 위해 Jackson 기반 Serializer 사용
+        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer();
+
+        // 키는 String으로 유지
+        t.setKeySerializer(stringSerializer);
+        t.setHashKeySerializer(stringSerializer);
+
+        // 값은 JSON/Object 직렬화 사용
+        t.setValueSerializer(jsonSerializer);
+        t.setHashValueSerializer(jsonSerializer);
+
         t.afterPropertiesSet();
         return t;
     }

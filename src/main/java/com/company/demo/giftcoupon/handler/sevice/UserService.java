@@ -2,6 +2,7 @@ package com.company.demo.giftcoupon.handler.sevice;
 
 import com.company.demo.common.response.error.ErrorCode;
 import com.company.demo.common.response.exception.BusinessException;
+import com.company.demo.giftcoupon.domain.entity.User;
 import com.company.demo.giftcoupon.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,5 +26,9 @@ public class UserService {
     public String getEmail(Long userId){
         String email = userRepository.findEmailByUserId(userId).orElse(adminEmail); // 나중엔 삭제할 예정
         return email;
+    }
+
+    public User findById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
     }
 }

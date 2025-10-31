@@ -25,4 +25,10 @@ public class User {
 
     @Column(name = "user_email", length = 30, nullable = true)
     private String email;
+
+    @Column(name = "user_gender", length = 30, nullable = true)
+    private String gender; // TODO: ENUM 적용
+
+    @Column(name = "user_age_group", length = 30, nullable = true)
+    private String ageGroup; // TODO: ENUM 적용
 }
