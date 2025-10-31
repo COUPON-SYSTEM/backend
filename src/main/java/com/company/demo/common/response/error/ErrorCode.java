@@ -16,7 +16,8 @@ public enum ErrorCode {
     COUPON_REDIS_FAILED(500, "C007", "Coupon Issuance Redis result is invalid"),
     REDIS_CONNECTION_FAILED(501, "C008", "Redis connection failed"),
     COUPON_SERIALIZATION_FAILED(500, "C009", "Outbox event failed serialization"),
-    DUPLICATE_USER_REQUEST(502, "C010", "User is duplicated");
+    DUPLICATE_USER_REQUEST(502, "C010", "User is duplicated"),
+    NOT_FOUND_FCMTOKEN(404, "C011", "[ERROR] 사용자의 FCMTOKEN을 확인할 수 없습니다." );
 
     private final int status;
     private final String code;

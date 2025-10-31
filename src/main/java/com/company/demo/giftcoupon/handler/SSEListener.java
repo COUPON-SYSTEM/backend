@@ -43,7 +43,6 @@ public class SSEListener implements CouponEventHandler {
         }
 
         CouponIssuedPayload payload = envelope.payload();
-        log.info("payload log: {}", payload);
         Long userId = payload.userId();
         SseEmitter emitter = sseEmitterRepository.findById(userId);
 
