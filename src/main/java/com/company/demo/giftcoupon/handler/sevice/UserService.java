@@ -16,8 +16,8 @@ public class UserService {
     private String adminEmail;
 
     public String getFcmToken(Long userId){
-        String fcmToken = userRepository.findFcmTokenByUserId(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_FCMTOKEN));
+        String fcmToken = userRepository.findFcmTokenByUserId(userId).orElseGet(null);
+                //.orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_FCMTOKEN)); 프론트 코드 변경시 연결
 
         return fcmToken;
     }

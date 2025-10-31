@@ -4,6 +4,8 @@ import com.company.demo.common.constant.KafkaTopic;
 import com.company.demo.giftcoupon.domain.repository.SseEmitterRepository;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.messaging.FirebaseMessaging;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,6 +46,12 @@ class SSEListenerTest {
 
     @MockitoBean
     private SseEmitterRepository sseEmitterRepository;
+
+    @MockitoBean
+    private FirebaseApp firebaseApp;
+
+    @MockitoBean
+    private FirebaseMessaging firebaseMessaging;
 
     private static final Long USER_ID = 123L;
     private static final Long COUPON_ID = 999L;
