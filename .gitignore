@@ -41,3 +41,4 @@ src/main/resources/application.yml
 *.yaml
 .DS_Store
 .data/
+src/main/resources/serviceAccountKey.json
