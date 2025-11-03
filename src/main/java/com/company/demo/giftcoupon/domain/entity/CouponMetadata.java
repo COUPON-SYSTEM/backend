@@ -32,7 +32,6 @@ public class CouponMetadata {
     @Column(name = "total_capacity")
     private Long totalCapacity;
 
-    // 이 필드는 Redis로 분리하는 것이 실시간 집계에 더 유리합니다.
     @Column(name = "issued_count")
     private Long issuedCount = 0L;
 
