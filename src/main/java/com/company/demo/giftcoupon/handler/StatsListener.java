@@ -42,7 +42,7 @@ public class StatsListener implements CouponEventHandler { // 쿠폰 발급에 �
 
         StatisticsDto updatedStats = statisticsService.processIssuedEvent(payload);
 
-        // 2. 발행자 ID (Publisher ID)를 통해 SSE Emitter 조회 (쿠폰 발행자를 식별해야 함)
+        // 발행자 ID (Publisher ID)를 통해 SSE Emitter 조회 (쿠폰 발행자를 식별해야 함)
         Long publisherId = updatedStats.publisherId(); // updatedStats에서 발행자 ID를 가져온다고 가정
 
         SseEmitter emitter = sseEmitterRepository.findById(publisherId);

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -35,19 +36,18 @@ public class RedisConfig {
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
 
-        // 1. Redis 연결 설정을 위한 객체를 생성합니다.
+        // Redis 연결 설정을 위한 객체를 생성
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
 
-        // 2. @Value로 가져온 database 번호를 설정합니다. (이 부분이 핵심 수정 사항)
         config.setDatabase(redisDatabase);
 
-        // 3. 설정된 정보를 바탕으로 LettuceConnectionFactory를 생성하여 반환합니다.
         return new LettuceConnectionFactory(config);
     }
 
     // serializer 설정으로 redis-cli를 통해 직접 데이터를 조회할 수 있도록 설정
-    @Bean
-    public RedisTemplate<String, String> stringRedisTemplate(RedisConnectionFactory cf) {
+    @Bean("customStringRedisTemplate")
+    @Primary
+    public RedisTemplate<String, String> stringTemplate(RedisConnectionFactory cf) {
         RedisTemplate<String, String> t = new RedisTemplate<>();
         t.setConnectionFactory(cf);
         StringRedisSerializer s = new StringRedisSerializer();
@@ -59,7 +59,7 @@ public class RedisConfig {
         return t;
     }
 
-    @Bean
+    @Bean("objectRedisTemplate")
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory cf) {
         RedisTemplate<String, Object> t = new RedisTemplate<>();
         t.setConnectionFactory(cf);

@@ -4,6 +4,7 @@ import com.company.demo.common.constant.RedisKey;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -19,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RedisCouponReader implements ItemReader<String> {
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> stringRedisTemplate;
     private static final String LUA_SCRIPT_PATH = "scripts/coupon_pop.lua";
     private final List<String> buffer = new ArrayList<>();
     private int cursor = 0;
@@ -51,7 +52,7 @@ public class RedisCouponReader implements ItemReader<String> {
             buffer.clear();
             cursor = 0;
 
-            List<String> result = (List<String>) redisTemplate.execute(
+            List<String> result = (List<String>) stringRedisTemplate.execute(
                     luaPopScript,
                     Collections.singletonList(RedisKey.COUPON_REQUEST_QUEUE_KEY),
                     String.valueOf(BATCH_SIZE)

@@ -15,7 +15,6 @@ public class RedisUtil {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    // --- Redis Key 정의 ---
     public String getIssuedCountKey(Long couponId) {
         return "stats:coupon:" + couponId + ":issued_count";
     }
