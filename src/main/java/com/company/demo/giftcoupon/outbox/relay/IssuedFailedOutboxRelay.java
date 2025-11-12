@@ -1,9 +1,11 @@
 package com.company.demo.giftcoupon.outbox.relay;
 
+import com.company.demo.common.client.CustomKafkaProducer;
 import com.company.demo.giftcoupon.outbox.domain.entity.CouponIssuanceOutboxEvent;
+import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
 import com.company.demo.giftcoupon.outbox.domain.repository.CouponIssuanceOutboxRepository;
-import com.company.demo.giftcoupon.outbox.publisher.KafkaOutboxPublisher;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,19 +26,18 @@ import java.time.LocalDateTime;
 public class IssuedFailedOutboxRelay {
 
     private final CouponIssuanceOutboxRepository outboxRepository;
-    private final KafkaOutboxPublisher publisher;
+    private final ObjectMapper objectMapper;
+    private final CustomKafkaProducer producer;
 
-    // 리스너가 처리할 시간을 주기 위한 그레이스(예: 15초)
     private static final long GRACE_SECONDS = 15;
 
     @Scheduled(fixedDelayString = "${app.outbox.failed-relay-delay-ms:3000}")
     public void tick() {
-        relayOnce();
+        relay();
     }
 
     @Transactional
-    protected void relayOnce() {
-        // (1) 리스너가 처리하지 못하고 남아있을 법한, 충분히 오래된 미발행 1건 선점
+    protected void relay() {
         LocalDateTime threshold = LocalDateTime.now().minusSeconds(GRACE_SECONDS);
         CouponIssuanceOutboxEvent e = outboxRepository
                 .claimOneUnpublishedForRetry(threshold)
@@ -45,27 +46,28 @@ public class IssuedFailedOutboxRelay {
         if (e == null) return;
 
         try {
-            // (2) Envelope로 변환
-            DomainEventEnvelope<String> envelope =
+            // JSON → 객체 변환
+            CouponIssuedPayload payload =
+                    objectMapper.readValue(e.getPayload(), CouponIssuedPayload.class);
+
+            // Envelope 생성
+            DomainEventEnvelope<CouponIssuedPayload> envelope =
                     DomainEventEnvelope.of(
                             e.getEventId(),
                             e.getEventType(),
                             e.getSource(),
-                            e.getPayload() // JSON 문자열(퍼블리셔에서 필요시 POJO로 변환)
+                            payload
                     );
 
-            // (3) 외부 전송(동기 확인)
-            publisher.publish(envelope);
+            // Kafka 전송
+            producer.sendIssuedMessage(envelope);
 
-            // (4) 성공 → is_published = true
-            e.markPublished(); // JPA 엔티티 변경 감지로 update
+            // 발행 완료 마킹
+            e.markPublished();
             log.info("[failed-relay] SENT outboxId={}, eventId={}", e.getId(), e.getEventId());
 
         } catch (Exception ex) {
-            // 실패 시엔 그대로 두면 됨(다음 tick에 다시 시도)
-            // 필요하다면 로그/알림 추가
             log.warn("[failed-relay] publish failed outboxId={}, err={}", e.getId(), ex.toString(), ex);
-            // ※ attempts/backoff 컬럼이 없으니, 임계치/알람은 모니터링으로 처리
         }
     }
 }
