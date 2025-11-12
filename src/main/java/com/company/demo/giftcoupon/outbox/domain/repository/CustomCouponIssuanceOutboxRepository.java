@@ -9,5 +9,5 @@ import java.util.Optional;
 
 public interface CustomCouponIssuanceOutboxRepository {
     @Transactional
-    Optional<CouponIssuanceOutboxEvent> claimOneFailedForRetry(LocalDateTime now, Duration lockTtl);
+    Optional<CouponIssuanceOutboxEvent> claimOneUnpublishedForRetry(LocalDateTime now);
 }

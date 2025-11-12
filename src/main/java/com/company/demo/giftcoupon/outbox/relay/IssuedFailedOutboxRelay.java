@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 /**
@@ -17,8 +18,8 @@ import java.time.LocalDateTime;
  * - NEW(방금 생성)는 건드리지 않고,
  * - created_at이 임계시간(threshold)보다 이전인 미발행 레코드만 재시도.
  */
-@Component
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class IssuedFailedOutboxRelay {
 
