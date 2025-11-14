@@ -37,8 +37,9 @@ public class CouponRequestRedisQueue {
      * @param userId 유저 아이디
      * @return 성공 여부
      */
-    public void tryPush(String userId) { // TODO: addUserToQueue 이름의 명확화, void말고 enum을 사용해서 결과 상태 반환 고려
+    public void tryPush(String userId, String promotionId) { // TODO: addUserToQueue 이름의 명확화, void말고 enum을 사용해서 결과 상태 반환 고려
         try {
+            String value = userId + ":" + promotionId;
             Long result = redisTemplate.execute(
                     pushIfUnderLimitScript,
                     Arrays.asList(
@@ -47,7 +48,7 @@ public class CouponRequestRedisQueue {
                             RedisKey.COUPON_USER_GUARD_PREFIX    // KEYS[3]
                     ),
                     String.valueOf(MAX_QUEUE_SIZE),                    // ARGV[1]: maxTotal
-                    String.valueOf(userId)                 // ARGV[2]: ★ 반드시 실제 userId 문자열 ★
+                    value                 // ARGV[2]:  userId + promotionId 문자열
             );
             log.info("Lua KEYS={}, ARGV={}",
                     Arrays.asList(
