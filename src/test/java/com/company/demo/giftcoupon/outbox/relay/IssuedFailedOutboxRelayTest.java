@@ -47,8 +47,10 @@ class IssuedFailedOutboxRelayTest {
         when(outboxRepository.claimOneUnpublishedForRetry(any(LocalDateTime.class)))
                 .thenReturn(Optional.empty());
 
+
         // when
-        relay.tick(); // tick() -> relay()
+        relay.relay();
+
 
         // then
         verifyNoInteractions(objectMapper, producer);
@@ -91,49 +93,70 @@ class IssuedFailedOutboxRelayTest {
     }
 
     @Test
-    @DisplayName("아웃박스의 페이로드를 파싱하는 중 에러 발생")
-    void relay_whenJsonParseFails_thenDoNotPublishNorMark() throws Exception {
-        // given
-        CouponIssuanceOutboxEvent entity = mock(CouponIssuanceOutboxEvent.class);
+    @DisplayName("아웃박스의 페이로드 파싱 중 에러 → publish 호출 안 되고 is_published는 false 유지")
+    void relay_whenJsonParseFails_thenDoNotPublishNorMark_andPublishedRemainsFalse() throws Exception {
+        // given: 실제 엔티티 생성(스파이)
+        CouponIssuanceOutboxEvent entity = spy(
+                CouponIssuanceOutboxEvent.builder()
+                        .id(1L)
+                        .eventId("evt-parse-fail")
+                        .eventType("COUPON_ISSUED")
+                        .source("giftcoupon")
+                        .payload("malformed-json")
+                        .createdAt(LocalDateTime.now().minusMinutes(1))
+                        .published(false)
+                        .build()
+        );
+
+
+        // when: 아웃박스 엔티티 하나 클레임되는 지 검증
         when(outboxRepository.claimOneUnpublishedForRetry(any(LocalDateTime.class)))
                 .thenReturn(Optional.of(entity));
-
-        when(entity.getPayload()).thenReturn("malformed-json");
+        // JSON 파싱 실패 유도
         when(objectMapper.readValue(anyString(), eq(CouponIssuedPayload.class)))
                 .thenThrow(new RuntimeException("parse error"));
-
-        // when
         relay.relay();
 
-        // then
+
+        // then: 실패 시 상태 유지 확인
         verifyNoInteractions(producer);
         verify(entity, never()).markPublished();
+        Assertions.assertFalse(entity.isPublished(), "published 플래그가 false여야 한다");
     }
 
     @Test
-    @DisplayName("퍼블리시 중 에러 발생")
-    void relay_whenKafkaSendThrows_thenDoNotMarkPublished() throws Exception {
-        // given
-        CouponIssuanceOutboxEvent entity = mock(CouponIssuanceOutboxEvent.class);
+    @DisplayName("퍼블리시 중 에러 → markPublished 호출 안 되고 is_published는 false 유지")
+    void relay_whenKafkaSendThrows_thenDoNotMarkPublished_andPublishedRemainsFalse() throws Exception {
+        // given: 실제 엔티티 생성(스파이)
+        CouponIssuanceOutboxEvent entity = spy(
+                CouponIssuanceOutboxEvent.builder()
+                        .id(2L)
+                        .eventId("evt-broker-down")
+                        .eventType("COUPON_ISSUED")
+                        .source("giftcoupon")
+                        .payload("{\"userId\":2,\"couponId\":20,\"issuedAt\":\"2025-11-12T09:05:00\"}")
+                        .createdAt(LocalDateTime.now().minusMinutes(1))
+                        .published(false)
+                        .build()
+        );
+
+
+        // when: 아웃박스 엔티티 하나 클레임되는 지 검증
         when(outboxRepository.claimOneUnpublishedForRetry(any(LocalDateTime.class)))
                 .thenReturn(Optional.of(entity));
-
-        when(entity.getEventId()).thenReturn("evt-999");
-        when(entity.getEventType()).thenReturn("COUPON_ISSUED");
-        when(entity.getSource()).thenReturn("giftcoupon");
-        when(entity.getPayload()).thenReturn("{\"userId\":2,\"couponId\":20,\"issuedAt\":\"2025-11-12T09:05:00\"}");
-
-        CouponIssuedPayload payload = CouponIssuedPayload.of(2L, 20L, LocalDateTime.parse("2025-11-12T09:05:00"));
+        // JSON 정상 파싱
+        CouponIssuedPayload payload = CouponIssuedPayload.of(
+                2L, 20L, LocalDateTime.parse("2025-11-12T09:05:00"));
         when(objectMapper.readValue(anyString(), eq(CouponIssuedPayload.class))).thenReturn(payload);
-
+        // 카프카 전송 예외 유도
         doThrow(new RuntimeException("broker down"))
                 .when(producer).sendIssuedMessage(any(DomainEventEnvelope.class));
-
-        // when
         relay.relay();
 
-        // then
+
+        // then: 실패 시 상태 유지 확인
         verify(producer, times(1)).sendIssuedMessage(any());
         verify(entity, never()).markPublished();
+        Assertions.assertFalse(entity.isPublished(), "published 플래그가 false여야 한다");
     }
 }
