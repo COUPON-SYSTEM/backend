@@ -15,20 +15,20 @@ public class RedisUtil {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public String getIssuedCountKey(Long couponId) {
-        return "stats:coupon:" + couponId + ":issued_count";
+    public String getIssuedCountKey(String eventId) {
+        return "stats:event:" + eventId + ":issued_count";
     }
 
-    public String getEstimatedRevenueKey(Long couponId) {
-        return "stats:coupon:" + couponId + ":estimated_revenue";
+    public String getEstimatedRevenueKey(String eventId) {
+        return "stats:event:" + eventId + ":estimated_revenue";
     }
 
-    public String getGenderCountsKey(Long couponId) {
-        return "stats:coupon:" + couponId + ":gender_counts";
+    public String getGenderCountsKey(String eventId) {
+        return "stats:event:" + eventId + ":gender_counts";
     }
 
-    public String getAgeGroupCountsKey(Long couponId) {
-        return "stats:coupon:" + couponId + ":age_counts";
+    public String getAgeGroupCountsKey(String eventId) {
+        return "stats:event:" + eventId + ":age_counts";
     }
 
     public String getVisitTrendChangeKey(Long publisherId) {

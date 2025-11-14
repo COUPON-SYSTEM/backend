@@ -3,7 +3,7 @@ package com.company.demo.giftcoupon.mapper.dto;
 import java.util.Map;
 
 public record StatisticsDto(Long publisherId,       // 쿠폰 발행자 ID
-                            Long couponId,          // 특정 쿠폰 식별자
+                            String eventId,          // 특정 쿠폰 식별자
                             Long issuedCount,       // 누적 발급 개수
                             Long remainingCount,    // 남은 개수
                             Long estimatedRevenue,  // 총 예상 매출

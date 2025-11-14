@@ -24,12 +24,9 @@ public class StatisticsService {
     private final CouponMetadataRepository couponMetadataRepository;
     private final StatisticsRepository statisticsRepository;
 
-    public StatisticsDto processIssuedEvent(CouponIssuedPayload payload) {
+    public StatisticsDto processIssuedEvent(Long userId, String eventId) {
 
-        Long couponId = payload.couponId();
-        Long userId = payload.userId();
-
-        CouponMetadata metadata = couponMetadataRepository.findByCouponId(couponId)
+        CouponMetadata metadata = couponMetadataRepository.findByEventId(eventId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_COUPON_ID));
 
         Long publisherId = metadata.getPublisherId();
@@ -43,33 +40,33 @@ public class StatisticsService {
         // Redis 실시간 지표 업데이트
 
         // 발급 개수 및 총 예상 매출 업데이트
-        statisticsRepository.incrementIssuedCount(couponId);
-        statisticsRepository.incrementEstimatedRevenue(couponId, couponValue);
+        statisticsRepository.incrementIssuedCount(eventId);
+        statisticsRepository.incrementEstimatedRevenue(eventId, couponValue);
 
         // 이용자 특성별 카운터 업데이트
-        statisticsRepository.incrementGenderCount(couponId, userGender);
-        statisticsRepository.incrementAgeGroupCount(couponId, userAgeGroup);
+        statisticsRepository.incrementGenderCount(eventId, userGender);
+        statisticsRepository.incrementAgeGroupCount(eventId, userAgeGroup);
 
         // 최신 통계 데이터 조회 및 DTO 구성
 
         // 현재 카운트 조회
-        Long issuedCount = statisticsRepository.getIssuedCount(couponId);
-        Long estimatedRevenue = statisticsRepository.getEstimatedRevenue(couponId);
+        Long issuedCount = statisticsRepository.getIssuedCount(eventId);
+        Long estimatedRevenue = statisticsRepository.getEstimatedRevenue(eventId);
 
         // 남은 개수 계산
         Long remainingCount = totalIssuedCapacity - issuedCount;
 
         // 성별/연령별 분포 비율 계산
-        Map<String, Long> totalGenderCounts = statisticsRepository.getGenderCounts(couponId);
+        Map<String, Long> totalGenderCounts = statisticsRepository.getGenderCounts(eventId);
         Map<String, Double> genderDistribution = calculateDistribution(totalGenderCounts, issuedCount);
 
-        Map<String, Long> totalAgeCounts = statisticsRepository.getAgeGroupCounts(couponId);
+        Map<String, Long> totalAgeCounts = statisticsRepository.getAgeGroupCounts(eventId);
         Map<String, Double> ageDistribution = calculateDistribution(totalAgeCounts, issuedCount);
         Double visitTrendChange = statisticsRepository.getVisitTrendChange(publisherId);
 
         return new StatisticsDto(
                 publisherId,
-                couponId,
+                eventId,
                 issuedCount,
                 remainingCount,
                 estimatedRevenue,

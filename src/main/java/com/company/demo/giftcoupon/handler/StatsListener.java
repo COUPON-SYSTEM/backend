@@ -39,8 +39,10 @@ public class StatsListener implements CouponEventHandler { // 쿠폰 발급에 �
 
     private void processAndSendStats(DomainEventEnvelope<CouponIssuedPayload> envelope){
         CouponIssuedPayload payload = envelope.payload();
+        String eventId = envelope.eventId();
+        Long userId = payload.userId();
 
-        StatisticsDto updatedStats = statisticsService.processIssuedEvent(payload);
+        StatisticsDto updatedStats = statisticsService.processIssuedEvent(userId, eventId);
 
         // 발행자 ID (Publisher ID)를 통해 SSE Emitter 조회 (쿠폰 발행자를 식별해야 함)
         Long publisherId = updatedStats.publisherId(); // updatedStats에서 발행자 ID를 가져온다고 가정
@@ -53,7 +55,7 @@ public class StatsListener implements CouponEventHandler { // 쿠폰 발급에 �
                         .name("coupon-stats-update")
                         .data(updatedStats) // 계산된 통계 객체를 JSON 형태로 전송
                 );
-                log.info("실시간 통계 전송 성공 - PublisherId: {}", publisherId);
+                log.info("실시간 통계 전송 성공 - PublisherId: {}, Data={}", publisherId, updatedStats);
             } catch (IOException e) {
                 sseEmitterRepository.deleteById(publisherId);
                 log.error("SSE 전송 실패, Emitter 제거: {}", publisherId, e);
