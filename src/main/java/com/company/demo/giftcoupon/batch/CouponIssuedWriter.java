@@ -33,7 +33,7 @@ public class CouponIssuedWriter implements ItemWriter<ProcessedCouponData> {
                 log.info("[2] after save, couponId={}", data.coupon().getId());
 
                 DomainEventEnvelope<CouponIssuedPayload> envelope =
-                        data.event().toEnvelope(Source.COUPON_ISSUED, data.coupon().getId());
+                        data.event().toEnvelope(Source.COUPON_ISSUANCE_SERVICE, data.coupon().getId());
                 log.info("[3] after envelope build: eventId={}", envelope.eventId());
 
                 eventRecorder.record(envelope);

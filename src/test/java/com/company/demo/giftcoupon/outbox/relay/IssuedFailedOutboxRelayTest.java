@@ -32,7 +32,6 @@ class IssuedFailedOutboxRelayTest {
     @Mock
     private CustomKafkaProducer producer;
 
-    // SUT
     private IssuedFailedOutboxRelay relay;
 
     @BeforeEach
@@ -65,7 +64,7 @@ class IssuedFailedOutboxRelayTest {
                 .thenReturn(Optional.of(entity));
 
         when(entity.getEventId()).thenReturn("evt-123");
-        when(entity.getEventType()).thenReturn("COUPON_ISSUED");
+        when(entity.getEventType()).thenReturn("COUPON_ISSUANCE_SERVICE");
         when(entity.getSource()).thenReturn("giftcoupon");
         when(entity.getPayload()).thenReturn("{\"userId\":1,\"couponId\":10,\"issuedAt\":\"2025-11-12T09:00:00\"}");
 
@@ -84,7 +83,7 @@ class IssuedFailedOutboxRelayTest {
         DomainEventEnvelope<CouponIssuedPayload> sent = captor.getValue();
         // 간단 무결성 체크
         Assertions.assertEquals("evt-123", sent.eventId());
-        Assertions.assertEquals("COUPON_ISSUED", sent.eventType());
+        Assertions.assertEquals("COUPON_ISSUANCE_SERVICE", sent.eventType());
         Assertions.assertEquals("giftcoupon", sent.source());
         Assertions.assertEquals(10L, sent.payload().couponId());
 
@@ -93,14 +92,14 @@ class IssuedFailedOutboxRelayTest {
     }
 
     @Test
-    @DisplayName("아웃박스의 페이로드 파싱 중 에러 → publish 호출 안 되고 is_published는 false 유지")
+    @DisplayName("아웃박스의 페이로드 파싱 중 에러 → is_published는 false 유지")
     void relay_whenJsonParseFails_thenDoNotPublishNorMark_andPublishedRemainsFalse() throws Exception {
         // given: 실제 엔티티 생성(스파이)
         CouponIssuanceOutboxEvent entity = spy(
                 CouponIssuanceOutboxEvent.builder()
                         .id(1L)
                         .eventId("evt-parse-fail")
-                        .eventType("COUPON_ISSUED")
+                        .eventType("COUPON_ISSUANCE_SERVICE")
                         .source("giftcoupon")
                         .payload("malformed-json")
                         .createdAt(LocalDateTime.now().minusMinutes(1))
@@ -125,14 +124,14 @@ class IssuedFailedOutboxRelayTest {
     }
 
     @Test
-    @DisplayName("퍼블리시 중 에러 → markPublished 호출 안 되고 is_published는 false 유지")
+    @DisplayName("퍼블리시 중 에러 → is_published는 false 유지")
     void relay_whenKafkaSendThrows_thenDoNotMarkPublished_andPublishedRemainsFalse() throws Exception {
         // given: 실제 엔티티 생성(스파이)
         CouponIssuanceOutboxEvent entity = spy(
                 CouponIssuanceOutboxEvent.builder()
                         .id(2L)
                         .eventId("evt-broker-down")
-                        .eventType("COUPON_ISSUED")
+                        .eventType("COUPON_ISSUANCE_SERVICE")
                         .source("giftcoupon")
                         .payload("{\"userId\":2,\"couponId\":20,\"issuedAt\":\"2025-11-12T09:05:00\"}")
                         .createdAt(LocalDateTime.now().minusMinutes(1))
