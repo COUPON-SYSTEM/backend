@@ -8,5 +8,5 @@ import lombok.*;
 @Data
 public class CouponIssueInput {
     private String userId;
-    private Long promotionId;
+    private String promotionId;
 }

@@ -20,7 +20,7 @@ public class CouponIssueProcessor implements ItemProcessor<CouponIssueInput, Pro
     @Override
     public ProcessedCouponData process(CouponIssueInput input) {
         String userId = input.getUserId();
-        Long promotionId = input.getPromotionId();
+        String promotionId = input.getPromotionId();
 
         // 1) 쿠폰 미리 구성 (DB 저장 금지)
         Coupon coupon = couponIssueService.issueCoupon(userId, promotionId);
