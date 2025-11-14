@@ -29,45 +29,55 @@ public class IssuedFailedOutboxRelay {
     private final ObjectMapper objectMapper;
     private final CustomKafkaProducer producer;
 
-    private static final long GRACE_SECONDS = 15;
-
-    @Scheduled(fixedDelayString = "${app.outbox.failed-relay-delay-ms:3000}")
-    public void tick() {
-        relay();
-    }
+    // 한 번에 최대 몇 건까지 재전송 시도할지 (튜닝 포인트)
+    private static final int MAX_RETRY_PER_RUN = 100;
 
     @Transactional
-    protected void relay() {
-        LocalDateTime threshold = LocalDateTime.now().minusSeconds(GRACE_SECONDS);
-        CouponIssuanceOutboxEvent e = outboxRepository
-                .claimOneUnpublishedForRetry(threshold)
-                .orElse(null);
+    public boolean relayOne() {
+        var threshold = LocalDateTime.now().minusMinutes(1);
 
-        if (e == null) return;
+        var entityOpt = outboxRepository.claimOneUnpublishedForRetry(threshold);
+        if (entityOpt.isEmpty()) {
+            return false;
+        }
+
+        var entity = entityOpt.get();
 
         try {
-            // JSON → 객체 변환
             CouponIssuedPayload payload =
-                    objectMapper.readValue(e.getPayload(), CouponIssuedPayload.class);
+                    objectMapper.readValue(entity.getPayload(), CouponIssuedPayload.class);
 
-            // Envelope 생성
             DomainEventEnvelope<CouponIssuedPayload> envelope =
                     DomainEventEnvelope.of(
-                            e.getEventId(),
-                            e.getEventType(),
-                            e.getSource(),
+                            entity.getEventId(),
+                            entity.getEventType(),
+                            entity.getSource(),
                             payload
                     );
 
-            // Kafka 전송
             producer.sendIssuedMessage(envelope);
-
-            // 발행 완료 마킹
-            e.markPublished();
-            log.info("[failed-relay] SENT outboxId={}, eventId={}", e.getId(), e.getEventId());
-
-        } catch (Exception ex) {
-            log.warn("[failed-relay] publish failed outboxId={}, err={}", e.getId(), ex.toString(), ex);
+            entity.markPublished(); // 여기까지가 한 건 트랜잭션
+        } catch (Exception e) {
+            // 실패 → published=false 유지 → 다음에 다시 시도
+            log.warn("[failed-relay] publish failed outboxId");
+            return true; // 그래도 "작업은 했다"로 보고 true
         }
+
+        return true;
+    }
+
+    @Scheduled(fixedDelay = 1000) // 1초 간격 등
+    public void relayMany() {
+        int count = 0;
+        while (count < MAX_RETRY_PER_RUN) {
+            boolean processed = relayOne(); // 여기서 매번 새 트랜잭션
+            if (!processed) {
+                break; // 더 이상 처리할 이벤트 없음
+            }
+            count++;
+        }
+        log.info("이번 주기에서 outbox 재시도 {}건 처리", count);
     }
 }
+
+
