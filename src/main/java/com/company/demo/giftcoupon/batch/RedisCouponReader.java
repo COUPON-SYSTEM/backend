@@ -69,7 +69,7 @@ public class RedisCouponReader implements ItemReader<CouponIssueInput> {
         String raw = buffer.get(cursor++); // "userId:promotionId"
         String[] parts = raw.split(":");
         String userId = parts[0];
-        Long promotionId = Long.parseLong(parts[1]);
+        String promotionId = parts[1];
 
         return new CouponIssueInput(userId, promotionId);
     }

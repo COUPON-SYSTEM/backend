@@ -29,7 +29,7 @@ public class CouponIssueProcessor implements ItemProcessor<CouponIssueInput, Pro
         // 2) Writer에게 전달할 재료 반환
         return ProcessedCouponData.builder()
                 .coupon(coupon)
-                .event(CouponIssuedEvent.of(coupon.getUserId(), EventType.ISSUED_EVENT))
+                .event(CouponIssuedEvent.of(EventType.ISSUED_EVENT))
                 .build();
     }
 }

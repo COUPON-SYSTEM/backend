@@ -68,7 +68,7 @@ class IssuedFailedOutboxRelayTest {
         when(entity.getSource()).thenReturn("giftcoupon");
         when(entity.getPayload()).thenReturn("{\"userId\":1,\"couponId\":10,\"issuedAt\":\"2025-11-12T09:00:00\"}");
 
-        CouponIssuedPayload payload = CouponIssuedPayload.of(1L, 10L, LocalDateTime.parse("2025-11-12T09:00:00"));
+        CouponIssuedPayload payload = CouponIssuedPayload.of(1L, 10L, LocalDateTime.parse("2025-11-12T09:00:00"), 3L);
         when(objectMapper.readValue(anyString(), eq(CouponIssuedPayload.class))).thenReturn(payload);
 
         ArgumentCaptor<DomainEventEnvelope<CouponIssuedPayload>> captor =
@@ -86,6 +86,7 @@ class IssuedFailedOutboxRelayTest {
         Assertions.assertEquals("COUPON_ISSUANCE_SERVICE", sent.eventType());
         Assertions.assertEquals("giftcoupon", sent.source());
         Assertions.assertEquals(10L, sent.payload().couponId());
+        Assertions.assertEquals(3L, sent.payload().promotionId());
 
         // then: 성공 마킹 호출됨
         verify(entity, times(1)).markPublished();
@@ -145,7 +146,7 @@ class IssuedFailedOutboxRelayTest {
                 .thenReturn(Optional.of(entity));
         // JSON 정상 파싱
         CouponIssuedPayload payload = CouponIssuedPayload.of(
-                2L, 20L, LocalDateTime.parse("2025-11-12T09:05:00"));
+                2L, 20L, LocalDateTime.parse("2025-11-12T09:05:00"), 3L);
         when(objectMapper.readValue(anyString(), eq(CouponIssuedPayload.class))).thenReturn(payload);
         // 카프카 전송 예외 유도
         doThrow(new RuntimeException("broker down"))
