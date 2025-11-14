@@ -159,4 +159,53 @@ class IssuedFailedOutboxRelayTest {
         verify(entity, never()).markPublished();
         Assertions.assertFalse(entity.isPublished(), "published 플래그가 false여야 한다");
     }
+
+    @Test
+    @DisplayName("이전 실행에서 실패한 아웃박스 이벤트가 다음 실행에서 재시도되어 성공적으로 퍼블리시됨")
+    void relay_whenFirstAttemptFails_thenRetryAndPublishSuccessfully() throws Exception {
+        // given: 실제 엔티티 생성(스파이)
+        CouponIssuanceOutboxEvent entity = spy(
+                CouponIssuanceOutboxEvent.builder()
+                        .id(3L)
+                        .eventId("evt-retry-success")
+                        .eventType("COUPON_ISSUANCE_SERVICE")
+                        .source("giftcoupon")
+                        .payload("{\"userId\":3,\"couponId\":30,\"issuedAt\":\"2025-11-12T09:10:00\"}")
+                        .createdAt(LocalDateTime.now().minusMinutes(1))
+                        .published(false)
+                        .build()
+        );
+
+        // 아웃박스에서 같은 이벤트를 계속 클레임한다고 가정 (1차 시도, 2차 시도 모두 동일 엔티티 반환)
+        when(outboxRepository.claimOneUnpublishedForRetry(any(LocalDateTime.class)))
+                .thenReturn(Optional.of(entity));
+
+        // JSON 파싱은 첫 번째 호출에서는 실패, 두 번째 호출에서는 성공하도록 설정
+        CouponIssuedPayload payload = CouponIssuedPayload.of(
+                3L,
+                30L,
+                LocalDateTime.parse("2025-11-12T09:10:00"),
+                5L
+        );
+
+        when(objectMapper.readValue(anyString(), eq(CouponIssuedPayload.class)))
+                .thenThrow(new RuntimeException("temporary parse error")) // 1차 배치 실행 시
+                .thenReturn(payload);                                    // 2차 배치 실행 시
+
+        // when 1차 실행: 파싱 에러 발생 → publish / markPublished 둘 다 안 됨
+        relay.relay();
+
+        // then (1차 실행 결과 확인)
+        verify(producer, times(0)).sendIssuedMessage(any());
+        verify(entity, never()).markPublished();
+        Assertions.assertFalse(entity.isPublished(), "1차 시도 후에도 published는 false 여야 한다");
+
+        // when 2차 실행: 재시도 시에는 파싱 성공 + 카프카 전송 성공
+        relay.relay();
+
+        // then (2차 실행 결과 확인)
+        verify(producer, times(1)).sendIssuedMessage(any(DomainEventEnvelope.class));
+        verify(entity, times(1)).markPublished();
+        Assertions.assertTrue(entity.isPublished(), "2차 시도 후에는 published가 true 여야 한다");
+    }
 }
