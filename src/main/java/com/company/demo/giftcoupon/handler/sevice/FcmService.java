@@ -21,7 +21,7 @@ public class FcmService {
      * @param title 알림 제목
      * @param body 알림 내용
      */
-    public void sendNotification(String token, String title, String body) {
+    public void sendNotification(String token, String title, String body) throws FirebaseMessagingException {
         Message message = Message.builder()
                 .setToken(token) // 알림을 보낼 디바이스 토큰
                 .setNotification(Notification.builder()
@@ -36,6 +36,7 @@ public class FcmService {
             log.info("Successfully sent message: {}", response);
         } catch (FirebaseMessagingException e) {
             log.error("Failed to send Firebase message to token {}: {}", token, e.getMessage());
+            throw e;
         }
     }
 }

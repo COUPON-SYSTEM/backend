@@ -39,7 +39,7 @@ class StatisticsServiceTest {
     @InjectMocks
     private StatisticsService statisticsService;
 
-    private static final String TEST_EVENT_ID = "100L";
+    private static final Long TEST_PROMOTION_ID = 1L;
     private static final Long TEST_USER_ID = 1L;
     private static final Long TEST_PUBLISHER_ID = 900L;
     private static final Long TOTAL_CAPACITY = 200L;
@@ -50,7 +50,7 @@ class StatisticsServiceTest {
     private void setupMocks() {
         // CouponMetadata 설정
         CouponMetadata metadata = mock(CouponMetadata.class);
-        when(couponMetadataRepository.findByEventId(TEST_EVENT_ID))
+        when(couponMetadataRepository.findByPromotionId(TEST_PROMOTION_ID))
                 .thenReturn(Optional.of(metadata));
         when(metadata.getPublisherId()).thenReturn(TEST_PUBLISHER_ID);
         when(metadata.getValue()).thenReturn(COUPON_VALUE);
@@ -63,14 +63,14 @@ class StatisticsServiceTest {
         when(user.getAgeGroup()).thenReturn("30s");
 
         // StatisticsRepository 조회 설정 (업데이트 후의 값)
-        when(statisticsRepository.getIssuedCount(TEST_EVENT_ID)).thenReturn(INITIAL_ISSUED_COUNT + 1);
-        when(statisticsRepository.getEstimatedRevenue(TEST_EVENT_ID)).thenReturn(INITIAL_ESTIMATED_REVENUE + COUPON_VALUE);
+        when(statisticsRepository.getIssuedCount(TEST_PROMOTION_ID)).thenReturn(INITIAL_ISSUED_COUNT + 1);
+        when(statisticsRepository.getEstimatedRevenue(TEST_PROMOTION_ID)).thenReturn(INITIAL_ESTIMATED_REVENUE + COUPON_VALUE);
 
         // 통계 분포 설정 (단순화)
         Map<String, Long> genderCounts = Map.of("MALE", 30L, "FEMALE", 21L); // 총 51명 가정
         Map<String, Long> ageCounts = Map.of("20s", 20L, "30s", 31L); // 총 51명 가정
-        when(statisticsRepository.getGenderCounts(TEST_EVENT_ID)).thenReturn(genderCounts);
-        when(statisticsRepository.getAgeGroupCounts(TEST_EVENT_ID)).thenReturn(ageCounts);
+        when(statisticsRepository.getGenderCounts(TEST_PROMOTION_ID)).thenReturn(genderCounts);
+        when(statisticsRepository.getAgeGroupCounts(TEST_PROMOTION_ID)).thenReturn(ageCounts);
 
         // 방문 추이 설정
         when(statisticsRepository.getVisitTrendChange(TEST_PUBLISHER_ID)).thenReturn(0.15); // 15% 증가 가정
@@ -83,18 +83,18 @@ class StatisticsServiceTest {
         setupMocks();
 
         // WHEN
-        StatisticsDto result = statisticsService.processIssuedEvent(TEST_USER_ID, TEST_EVENT_ID);
+        StatisticsDto result = statisticsService.processIssuedEvent(TEST_USER_ID, TEST_PROMOTION_ID);
 
         // THEN
         // Repository 업데이트 메서드 호출 검증 (핵심 로직 검증)
-        verify(statisticsRepository, times(1)).incrementIssuedCount(TEST_EVENT_ID);
-        verify(statisticsRepository, times(1)).incrementEstimatedRevenue(TEST_EVENT_ID, COUPON_VALUE);
-        verify(statisticsRepository, times(1)).incrementGenderCount(TEST_EVENT_ID, "MALE");
-        verify(statisticsRepository, times(1)).incrementAgeGroupCount(TEST_EVENT_ID, "30s");
+        verify(statisticsRepository, times(1)).incrementIssuedCount(TEST_PROMOTION_ID);
+        verify(statisticsRepository, times(1)).incrementEstimatedRevenue(TEST_PROMOTION_ID, COUPON_VALUE);
+        verify(statisticsRepository, times(1)).incrementGenderCount(TEST_PROMOTION_ID, "MALE");
+        verify(statisticsRepository, times(1)).incrementAgeGroupCount(TEST_PROMOTION_ID, "30s");
 
         // 반환된 DTO 값 검증
         assertThat(result.publisherId()).isEqualTo(TEST_PUBLISHER_ID);
-        assertThat(result.eventId()).isEqualTo(TEST_EVENT_ID);
+        assertThat(result.promotionId()).isEqualTo(TEST_PROMOTION_ID);
 
         // 발급 개수, 매출, 남은 개수 검증
         assertThat(result.issuedCount()).isEqualTo(INITIAL_ISSUED_COUNT + 1); // 51
@@ -114,11 +114,11 @@ class StatisticsServiceTest {
     void testProcessIssuedEvent_MetadataNotFound() {
         // GIVEN
         // CouponMetadataRepository가 Optional.empty()를 반환하도록 설정
-        when(couponMetadataRepository.findByEventId(TEST_EVENT_ID)).thenReturn(Optional.empty());
+        when(couponMetadataRepository.findByPromotionId(TEST_PROMOTION_ID)).thenReturn(Optional.empty());
 
         // WHEN & THEN
         BusinessException exception = assertThrows(BusinessException.class,
-                () -> statisticsService.processIssuedEvent(TEST_USER_ID, TEST_EVENT_ID));
+                () -> statisticsService.processIssuedEvent(TEST_USER_ID, TEST_PROMOTION_ID));
 
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_COUPON_ID);
 

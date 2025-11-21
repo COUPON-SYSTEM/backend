@@ -88,8 +88,6 @@ public class KafkaProducerConfig {
 
         return new DefaultKafkaProducerFactory<>(props);
     }
-<<<<<<< HEAD
-=======
 
     // --- KafkaTemplate 빈 정의 ---
 
@@ -105,5 +103,4 @@ public class KafkaProducerConfig {
         // Object 타입을 처리하는 jsonProducerFactory를 사용
         return new KafkaTemplate<>(jsonProducerFactory(), true);
     }
->>>>>>> main
 }

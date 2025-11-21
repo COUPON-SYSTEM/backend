@@ -7,6 +7,7 @@ import com.company.demo.giftcoupon.handler.sevice.FcmService;
 import com.company.demo.giftcoupon.handler.sevice.UserService;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -27,11 +28,11 @@ public class NotificationListener implements CouponEventHandler {
             groupId = GroupType.NOTIFICATION,
             containerFactory = "couponIssueKafkaListenerContainerFactory"
     )
-    public void handle(DomainEventEnvelope<CouponIssuedPayload> envelope) {
+    public void handle(DomainEventEnvelope<CouponIssuedPayload> envelope) throws FirebaseMessagingException {
         notification(envelope);
     }
 
-    private void notification(DomainEventEnvelope<CouponIssuedPayload> envelope){
+    private void notification(DomainEventEnvelope<CouponIssuedPayload> envelope) throws FirebaseMessagingException {
         CouponIssuedPayload payload = envelope.payload();
 
         String fcmToken = userService.getFcmToken(payload.userId());

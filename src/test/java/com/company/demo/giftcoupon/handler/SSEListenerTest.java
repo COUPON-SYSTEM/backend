@@ -55,6 +55,7 @@ class SSEListenerTest {
 
     private static final Long USER_ID = 123L;
     private static final Long COUPON_ID = 999L;
+    private static final Long PROMOTION_ID = 1L;
     private static final String EVENT_TYPE = "coupon-issued";
     private static final String SOURCE = "giftcoupon-service";
 
@@ -75,7 +76,7 @@ class SSEListenerTest {
                 .when(emitter)
                 .send(any(SseEmitter.SseEventBuilder.class));
 
-        publishCouponIssued(USER_ID, COUPON_ID);
+        publishCouponIssued(USER_ID, COUPON_ID, PROMOTION_ID);
 
         assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
         verify(sseEmitterRepository, atLeastOnce()).findById(USER_ID);
@@ -87,7 +88,7 @@ class SSEListenerTest {
     void ignoresWhenNoEmitter() throws Exception {
         when(sseEmitterRepository.findById(USER_ID)).thenReturn(null);
 
-        publishCouponIssued(USER_ID, COUPON_ID);
+        publishCouponIssued(USER_ID, COUPON_ID, PROMOTION_ID);
 
         Thread.sleep(200);
         verify(sseEmitterRepository, atLeastOnce()).findById(USER_ID);
@@ -107,7 +108,7 @@ class SSEListenerTest {
             throw new IOException("disconnected");
         }).when(failingEmitter).send(any(SseEmitter.SseEventBuilder.class));
 
-        publishCouponIssued(USER_ID, COUPON_ID);
+        publishCouponIssued(USER_ID, COUPON_ID, PROMOTION_ID);
 
         assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
 
@@ -139,9 +140,9 @@ class SSEListenerTest {
         doAnswer(inv -> { latch.countDown(); return null; })
                 .when(e3).send(any(SseEmitter.SseEventBuilder.class));
 
-        publishCouponIssued(u1, 101L);
-        publishCouponIssued(u2, 102L);
-        publishCouponIssued(u3, 103L);
+        publishCouponIssued(u1, 101L, 1L);
+        publishCouponIssued(u2, 102L, 1L);
+        publishCouponIssued(u3, 103L, 1L);
 
         assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
 
@@ -150,11 +151,12 @@ class SSEListenerTest {
         verify(e3, times(1)).send(any(SseEmitter.SseEventBuilder.class));
     }
 
-    private void publishCouponIssued(Long userId, Long couponId) {
+    private void publishCouponIssued(Long userId, Long couponId, Long promotionId) {
         CouponIssuedPayload payload = CouponIssuedPayload.of(
                 userId,
                 couponId,
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                promotionId
         );
 
         DomainEventEnvelope<CouponIssuedPayload> envelope = DomainEventEnvelope.of(
