@@ -1,8 +1,6 @@
 package com.company.demo.common.config.batch;
 
-import com.company.demo.giftcoupon.batch.CouponIssueProcessor;
-import com.company.demo.giftcoupon.batch.CouponIssuedWriter;
-import com.company.demo.giftcoupon.batch.ProcessedCouponData;
+import com.company.demo.giftcoupon.batch.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -11,7 +9,6 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.batch.core.Job;
-import com.company.demo.giftcoupon.batch.RedisCouponReader;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -33,7 +30,7 @@ public class CouponRequestJobConfig {
     @Bean
     public Step couponIssueStep() {
         return new StepBuilder("couponIssueStep", jobRepository)
-                .<String, ProcessedCouponData>chunk(10, transactionManager)
+                .<CouponIssueInput, ProcessedCouponData>chunk(10, transactionManager)
                 .reader(redisCouponReader)
                 .processor(couponIssueProcessor)
                 .writer(couponIssuedWriter)

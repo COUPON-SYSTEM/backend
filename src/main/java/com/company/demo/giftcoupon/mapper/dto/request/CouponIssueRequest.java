@@ -8,4 +8,5 @@ import lombok.*;
 @Getter
 public class CouponIssueRequest {
     private Long userId;
+    private Long promotionId;
 }
