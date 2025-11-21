@@ -39,9 +39,10 @@ public class HistoryListener implements CouponEventHandler {
         try {
             History history = new History(payload.couponId(), payload.userId(), payload.issuedAt());
             historyRepository.save(history);
-            log.info("쿠폰 발급 이력 저장 성공 - CouponId: {}", payload.couponId());
+            log.info("쿠폰 발급 이력 저장 성공 - CouponId: {}, EventId: {}", payload.couponId(), payload.promotionId());
         } catch (Exception e) {
-            log.error("쿠폰 발급 이력 저장 실패 - CouponId: {}", payload.couponId(), e.getMessage(), e);
+            log.error("쿠폰 발급 이력 저장 실패 - CouponId: {}, EventId: {}", payload.couponId(), payload.promotionId(),
+                    e.getMessage(), e);
             throw e;
         }
     }

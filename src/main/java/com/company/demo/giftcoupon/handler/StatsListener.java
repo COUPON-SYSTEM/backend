@@ -39,10 +39,10 @@ public class StatsListener implements CouponEventHandler { // 쿠폰 발급에 �
 
     private void processAndSendStats(DomainEventEnvelope<CouponIssuedPayload> envelope){
         CouponIssuedPayload payload = envelope.payload();
-        String eventId = envelope.eventId();
+        Long promotionId = payload.promotionId();
         Long userId = payload.userId();
 
-        StatisticsDto updatedStats = statisticsService.processIssuedEvent(userId, eventId);
+        StatisticsDto updatedStats = statisticsService.processIssuedEvent(userId, promotionId);
 
         // 발행자 ID (Publisher ID)를 통해 SSE Emitter 조회 (쿠폰 발행자를 식별해야 함)
         Long publisherId = updatedStats.publisherId(); // updatedStats에서 발행자 ID를 가져온다고 가정

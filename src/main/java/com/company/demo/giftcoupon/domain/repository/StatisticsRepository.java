@@ -16,48 +16,48 @@ public class StatisticsRepository {
 
     // 증가
 
-    public void incrementIssuedCount(String eventId) {
-        String key = redisUtil.getIssuedCountKey(eventId);
+    public void incrementIssuedCount(Long promotionId) {
+        String key = redisUtil.getIssuedCountKey(promotionId);
         redisUtil.incrementValue(key, 1);
     }
 
-    public void incrementEstimatedRevenue(String eventId, Long couponValue) {
-        String key = redisUtil.getEstimatedRevenueKey(eventId);
+    public void incrementEstimatedRevenue(Long promotionId, Long couponValue) {
+        String key = redisUtil.getEstimatedRevenueKey(promotionId);
         redisUtil.incrementValue(key, couponValue);
     }
 
-    public void incrementGenderCount(String eventId, String gender) {
-        String key = redisUtil.getGenderCountsKey(eventId);
+    public void incrementGenderCount(Long promotionId, String gender) {
+        String key = redisUtil.getGenderCountsKey(promotionId);
         redisUtil.incrementHashField(key, gender, 1);
     }
 
-    public void incrementAgeGroupCount(String eventId, String ageGroup) {
-        String key = redisUtil.getAgeGroupCountsKey(eventId);
+    public void incrementAgeGroupCount(Long promotionId, String ageGroup) {
+        String key = redisUtil.getAgeGroupCountsKey(promotionId);
         redisUtil.incrementHashField(key, ageGroup, 1);
     }
 
     // 조회
 
-    public Long getIssuedCount(String eventId) {
-        String key = redisUtil.getIssuedCountKey(eventId);
+    public Long getIssuedCount(Long promotionId) {
+        String key = redisUtil.getIssuedCountKey(promotionId);
         Object value = redisUtil.getValue(key);
         //TODO: RedisUtil이 반환한 Object를 안전하게 Long으로 변환 (Integer/String 방지 로직 필요)
         return value == null ? 0L : Long.valueOf(value.toString());
     }
 
-    public Long getEstimatedRevenue(String eventId) {
-        String key = redisUtil.getEstimatedRevenueKey(eventId);
+    public Long getEstimatedRevenue(Long promotionId) {
+        String key = redisUtil.getEstimatedRevenueKey(promotionId);
         Object value = redisUtil.getValue(key);
         return value == null ? 0L : Long.valueOf(value.toString());
     }
 
-    public Map<String, Long> getGenderCounts(String eventId) {
-        String key = redisUtil.getGenderCountsKey(eventId);
+    public Map<String, Long> getGenderCounts(Long promotionId) {
+        String key = redisUtil.getGenderCountsKey(promotionId);
         return redisUtil.getHashEntries(key);
     }
 
-    public Map<String, Long> getAgeGroupCounts(String eventId) {
-        String key = redisUtil.getAgeGroupCountsKey(eventId);
+    public Map<String, Long> getAgeGroupCounts(Long promotionId) {
+        String key = redisUtil.getAgeGroupCountsKey(promotionId);
         return redisUtil.getHashEntries(key);
     }
 

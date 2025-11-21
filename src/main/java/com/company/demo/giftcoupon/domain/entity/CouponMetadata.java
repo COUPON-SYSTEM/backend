@@ -15,8 +15,8 @@ public class CouponMetadata {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "event_id", unique = true, nullable = false)
-    private Long eventId;
+    @Column(name = "promotion_id", unique = true, nullable = false)
+    private Long promotionId;
 
     @Column(name = "publisher_id", nullable = false)
     private Long publisherId;
