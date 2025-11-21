@@ -16,7 +16,7 @@ public class Coupon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "coupon_id", nullable = false)
-    private Long id; // 쿠폰 아이디
+    private Long id;
 
     @Column(name = "event_id", nullable = true)
     private Long eventId;
@@ -32,6 +32,9 @@ public class Coupon {
 
     @Column(name = "event_type", nullable = true)
     private String eventType;
+
+    @Column(name = "promotion_id", nullable = false)
+    private Long promotionId;
 
 //    @Enumerated(EnumType.STRING)
 //    @Column(nullable = false)

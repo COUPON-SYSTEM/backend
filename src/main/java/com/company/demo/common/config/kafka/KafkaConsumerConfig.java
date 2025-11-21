@@ -2,24 +2,17 @@ package com.company.demo.common.config.kafka;
 
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
-import com.fasterxml.jackson.core.type.TypeReference;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference; // HEAD 내용
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.*;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -42,6 +35,7 @@ public class KafkaConsumerConfig {
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId; // TODO: 모든 컨슈머가 같은 group-id를 사용하면 안됨
 
+    // KafkaTemplate<String, DomainEventEnvelope<CouponIssuedPayload>>를 사용
     private final KafkaTemplate<String, DomainEventEnvelope<CouponIssuedPayload>> kafkaTemplate;
 
     /**
@@ -50,8 +44,8 @@ public class KafkaConsumerConfig {
      *
      * 주의:
      * - JsonDeserializer에 DomainEventEnvelope.class만 전달하면
-     *   내부 payload는 CouponIssuedPayload로 바로 변환되지 않고 LinkedHashMap일 수 있다.
-     *   그 부분은 @KafkaListener 쪽에서 ObjectMapper.convertValue(...)로 처리한다.
+     * 내부 payload는 CouponIssuedPayload로 바로 변환되지 않고 LinkedHashMap일 수 있다.
+     * 그 부분은 @KafkaListener 쪽에서 ObjectMapper.convertValue(...)로 처리한다.
      */
     @Bean
     public ConsumerFactory<String, DomainEventEnvelope<CouponIssuedPayload>> couponIssuedConsumerFactory() {
@@ -60,6 +54,8 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+
+        // TypeReference를 사용하여 제네릭 타입 정보를 유지하며 역직렬화 설정
         TypeReference<DomainEventEnvelope<CouponIssuedPayload>> typeRef =
                 new TypeReference<DomainEventEnvelope<CouponIssuedPayload>>() {};
 
@@ -100,7 +96,7 @@ public class KafkaConsumerConfig {
         /*
          * 실패 처리 전략
          *
-         * - Listener에서 예외가 터지면 DefaultErrorHandler가介入.
+         * - Listener에서 예외가 터지면 DefaultErrorHandler가 개입.
          * - 1초 간격으로 3번 재시도.
          * - 그래도 실패하면 DeadLetterPublishingRecoverer가 원본토픽.DLT 로 메시지를 보냄.
          */

@@ -16,6 +16,12 @@ public class CustomKafkaProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final KafkaTemplate<String, DomainEventEnvelope<CouponIssuedPayload>> issuedKafkaTemplate;
 
+    @Qualifier("giftCouponKafkaTemplate")
+    private final KafkaTemplate<String, Object> giftKafkaTemplate;
+
+    @Qualifier("giftCouponKafkaTemplate")
+    private final KafkaTemplate<String, Object> issueKafkaTemplate;
+
     public void sendMessage(String topic, String message) {
         kafkaTemplate.send(topic, message);
         log.info("Message sent to topic " + topic + " : " + message);

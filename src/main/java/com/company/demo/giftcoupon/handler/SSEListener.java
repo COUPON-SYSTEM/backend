@@ -3,16 +3,12 @@ package com.company.demo.giftcoupon.handler;
 import com.company.demo.common.constant.GroupType;
 import com.company.demo.common.constant.KafkaTopic;
 import com.company.demo.giftcoupon.domain.repository.SseEmitterRepository;
-import com.company.demo.giftcoupon.event.CouponIssuedEvent;
-import com.company.demo.giftcoupon.handler.CouponEventHandler;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 

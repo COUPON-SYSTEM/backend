@@ -13,26 +13,24 @@ import java.util.UUID;
 @Builder
 public record CouponIssuedEvent(
         String eventId,
-        Long userId,
         String eventType,
         LocalDateTime issuedAt
 ) {
-    public static CouponIssuedEvent of(Long userId, String eventType) {
+    public static CouponIssuedEvent of(String eventType) {
         return CouponIssuedEvent.builder()
                 .eventId(UUID.randomUUID().toString())
-                .userId(userId)
                 .eventType(eventType)
                 .issuedAt(LocalDateTime.now())
                 .build();
     }
 
     /** Envelope 변환 */
-    public DomainEventEnvelope<CouponIssuedPayload> toEnvelope(String source, Long couponId) {
+    public DomainEventEnvelope<CouponIssuedPayload> toEnvelope(String source, Long couponId, Long promotionId, Long userId) {
         return DomainEventEnvelope.of(
                 this.eventId,
                 this.eventType,
                 source,
-                CouponIssuedPayload.of(this.userId, couponId, this.issuedAt)
+                CouponIssuedPayload.of(userId, couponId, this.issuedAt, promotionId)
         );
     }
 }

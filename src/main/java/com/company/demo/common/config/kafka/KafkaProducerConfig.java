@@ -88,4 +88,22 @@ public class KafkaProducerConfig {
 
         return new DefaultKafkaProducerFactory<>(props);
     }
+<<<<<<< HEAD
+=======
+
+    // --- KafkaTemplate 빈 정의 ---
+
+    @Bean
+    @Qualifier("stringKafkaTemplate")
+    public KafkaTemplate<String, String> stringKafkaTemplate() { // 이름 변경으로 명확성 증가
+        return new KafkaTemplate<>(stringProducerFactory());
+    }
+
+    @Bean
+    @Qualifier("giftCouponKafkaTemplate")
+    public KafkaTemplate<String, Object> giftCouponKafkaTemplate() {
+        // Object 타입을 처리하는 jsonProducerFactory를 사용
+        return new KafkaTemplate<>(jsonProducerFactory(), true);
+    }
+>>>>>>> main
 }

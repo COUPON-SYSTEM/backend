@@ -21,7 +21,11 @@
 //    private KafkaTemplate<String, String> kafkaTemplate;
 //
 //    @Mock
+<<<<<<< HEAD
 //    private KafkaTemplate<String, CouponIssueEvent> giftKafkaTemplate;
+=======
+//    private KafkaTemplate<String, CouponIssuedEvent> giftKafkaTemplate;
+>>>>>>> main
 //
 //    @InjectMocks
 //    private CustomKafkaProducer kafkaProducer;

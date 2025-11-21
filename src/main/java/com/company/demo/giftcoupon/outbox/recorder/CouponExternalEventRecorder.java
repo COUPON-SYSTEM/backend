@@ -20,7 +20,11 @@ public class CouponExternalEventRecorder {
     private final ObjectMapper objectMapper;
 
     /**
+<<<<<<< HEAD
      * Envelope 전체를 JSON으로 저장 (권장)
+=======
+     * Envelope 전체를 JSON으로 저장
+>>>>>>> main
      * - eventId: 도메인 이벤트의 eventId와 Envelope의 eventId를 동일하게 맞춘다.
      * - payload only 저장이 아니라 envelope 전체 저장으로 멱등/추적/스키마 진화에 유리.
      */

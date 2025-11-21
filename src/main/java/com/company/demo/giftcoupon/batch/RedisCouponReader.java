@@ -4,7 +4,6 @@ import com.company.demo.common.constant.RedisKey;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -18,9 +17,9 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class RedisCouponReader implements ItemReader<String> {
+public class RedisCouponReader implements ItemReader<CouponIssueInput> {
 
-    private final RedisTemplate<String, String> stringRedisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
     private static final String LUA_SCRIPT_PATH = "scripts/coupon_pop.lua";
     private final List<String> buffer = new ArrayList<>();
     private int cursor = 0;
@@ -47,12 +46,12 @@ public class RedisCouponReader implements ItemReader<String> {
      *
      */
     @Override
-    public String read() {
+    public CouponIssueInput read() {
         if (cursor >= buffer.size()) {
             buffer.clear();
             cursor = 0;
 
-            List<String> result = (List<String>) stringRedisTemplate.execute(
+            List<String> result = (List<String>) redisTemplate.execute(
                     luaPopScript,
                     Collections.singletonList(RedisKey.COUPON_REQUEST_QUEUE_KEY),
                     String.valueOf(BATCH_SIZE)
@@ -67,6 +66,11 @@ public class RedisCouponReader implements ItemReader<String> {
             }
         }
 
-        return buffer.get(cursor++);
+        String raw = buffer.get(cursor++); // "userId:promotionId"
+        String[] parts = raw.split(":");
+        String userId = parts[0];
+        String promotionId = parts[1];
+
+        return new CouponIssueInput(userId, promotionId);
     }
 }
