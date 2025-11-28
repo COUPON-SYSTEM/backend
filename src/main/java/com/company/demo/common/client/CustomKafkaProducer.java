@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.ExecutionException;
+
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -27,7 +29,8 @@ public class CustomKafkaProducer {
         log.info("Message sent to topic " + topic + " : " + message);
     }
 
-    public void sendIssuedMessage(DomainEventEnvelope<CouponIssuedPayload> envelope) {
-        issuedKafkaTemplate.send(KafkaTopic.COUPON_ISSUED, envelope);
+    public void sendIssuedMessage(DomainEventEnvelope<CouponIssuedPayload> envelope) throws ExecutionException, InterruptedException {
+        issuedKafkaTemplate.send(KafkaTopic.COUPON_ISSUED, envelope)
+                .get();
     }
 }

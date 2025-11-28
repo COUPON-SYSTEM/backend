@@ -2,23 +2,17 @@ package com.company.demo.common.config.kafka;
 
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference; // HEAD 내용
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.*;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
-import org.springframework.kafka.support.serializer.JsonSerializer;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -41,118 +35,135 @@ public class KafkaConsumerConfig {
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId; // TODO: 모든 컨슈머가 같은 group-id를 사용하면 안됨
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, DomainEventEnvelope<?>> dltKafkaTemplate;
 
-    private static final String SCHEMA_REGISTRY_URL = "http://localhost:8081";
-
-    /**
-     * 기본 Consumer 설정을 정의합니다.
-     */
-    private Map<String, Object> baseConsumerConfigs() {
-
-        JsonDeserializer<Object> deserializer = new JsonDeserializer<>(Object.class);
-        deserializer.addTrustedPackages("*"); //TODO: 신뢰할 패키지 제한
-
+    @Bean
+    public ConsumerFactory<String, DomainEventEnvelope<?>> couponIssuedConsumerFactory() {
+        log.info(">>> couponIssuedConsumerFactory 생성됨");
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "30000");
+        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, "10000");
+        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, "300000");
+
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
-        // JsonDeserializer를 위한 신뢰 패키지 설정 (매우 중요)
-        // com.company.demo 아래의 모든 클래스를 신뢰하도록 설정합니다.
-        props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.company.demo.*");
-        return props;
-    }
+        JsonDeserializer<DomainEventEnvelope<?>> valueDeserializer =
+                new JsonDeserializer<>();
 
-    public ConsumerFactory<String, Object> consumerFactory() {
-        JsonDeserializer<Object> deserializer = new JsonDeserializer<>(Object.class);
-        deserializer.addTrustedPackages("*"); //TODO: 신뢰할 패키지 제한
+        valueDeserializer.addTrustedPackages("*");
+        valueDeserializer.setRemoveTypeHeaders(false);
+        valueDeserializer.setUseTypeMapperForKey(false);
 
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
-    }
-
-    /**
-     * CouponIssuedPayload를 역직렬화하는 ConsumerFactory를 생성합니다.
-     */
-    public ConsumerFactory<String, DomainEventEnvelope<CouponIssuedPayload>> couponIssuedConsumerFactory() {
         return new DefaultKafkaConsumerFactory<>(
-                baseConsumerConfigs(),
+                props,
                 new StringDeserializer(),
-                new JsonDeserializer<>(DomainEventEnvelope.class, false)
+                valueDeserializer
         );
     }
 
+
     /**
-     * @KafkaListener에서 사용할 리스너 컨테이너 팩토리를 빈으로 등록합니다.
+     * 실제 @KafkaListener(containerFactory="couponIssueKafkaListenerContainerFactory")
+     * 에서 사용할 리스너 컨테이너 팩토리.
+     *
+     * - poll 스레드를 띄우고
+     * - record 단위 ack 하고
+     * - 예외 시 재시도 & DLQ 전송 로직까지 세팅한다.
      */
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, DomainEventEnvelope<CouponIssuedPayload>>
-    couponIssueKafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, DomainEventEnvelope<CouponIssuedPayload>> factory =
+    public ConcurrentKafkaListenerContainerFactory<String, DomainEventEnvelope<?>>
+    couponIssueKafkaListenerContainerFactory(
+            ConsumerFactory<String, DomainEventEnvelope<?>> couponIssuedConsumerFactory
+    ) {
+        ConcurrentKafkaListenerContainerFactory<String, DomainEventEnvelope<?>> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(couponIssuedConsumerFactory());
-        return factory;
-    }
 
-    // DLQ를 위한 Container Factory
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
-        factory.setConcurrency(3); // 병렬 처리 스레드 수
+        factory.setConsumerFactory(couponIssuedConsumerFactory);
+        factory.setConcurrency(1);
+
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
 
-        // DLQ 설정
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
-                kafkaTemplate,
+                dltKafkaTemplate,
                 (record, exception) -> {
-                    // DLT 토픽 이름 규칙: 원본토픽.DLT
                     String dltTopicName = record.topic() + ".DLT";
-                    log.warn("메시지를 DLT로 전송 - 원본토픽: {}, DLT토픽: {}, 오류: {}",
-                            record.topic(), dltTopicName, exception.getMessage());
-                    return new TopicPartition(dltTopicName, 0); // 파티션 0으로 통일
+                    log.warn(
+                            "=== DLT로 전송 ===\n" +
+                                    "원본토픽: {}\n" +
+                                    "DLT토픽: {}\n" +
+                                    "Offset: {}\n" +
+                                    "Key: {}\n" +
+                                    "Value: {}\n" +
+                                    "오류: {}",
+                            record.topic(),
+                            dltTopicName,
+                            record.offset(),
+                            record.key(),
+                            record.value(),
+                            exception.getMessage()
+                    );
+                    return new TopicPartition(dltTopicName, 0);
                 }
         );
 
-        // 재시도 정책: 1초 간격으로 3번 재시도
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(
                 recoverer,
                 new FixedBackOff(1000L, 3)
         );
 
-        // 특정 예외는 재시도하지 않고 바로 DLT로 전송
+        errorHandler.setCommitRecovered(true);     // DLT 전송 성공 시 원본 offset 커밋
+        errorHandler.setSeekAfterError(false);     // 에러 후 같은 레코드 다시 안 읽음
+        errorHandler.setAckAfterHandle(true);      // 처리 후 ack
+
         errorHandler.addNotRetryableExceptions(
                 IllegalArgumentException.class,
-                JsonProcessingException.class
+                JsonProcessingException.class,
+                NullPointerException.class
         );
 
         factory.setCommonErrorHandler(errorHandler);
+
         return factory;
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Object> dlqListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
+    public ConcurrentKafkaListenerContainerFactory<String, DomainEventEnvelope<?>>
+    dlqListenerContainerFactory(
+            ConsumerFactory<String, DomainEventEnvelope<?>> couponIssuedConsumerFactory
+    ) {
+        ConcurrentKafkaListenerContainerFactory<String, DomainEventEnvelope<?>> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
-        factory.setConcurrency(1); // DLQ는 순차 처리
+
+        factory.setConsumerFactory(couponIssuedConsumerFactory);
+        factory.setConcurrency(1);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
 
-        // DLQ에서는 추가 재시도 없음 (이미 재시도를 다 한 상태)
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(
-                new FixedBackOff(0L, 0) // 재시도 없음
+                (record, exception) -> {
+                    log.error("=== DLT 메시지 처리 실패 (무시됨) ===\n" +
+                                    "Topic: {}\n" +
+                                    "Offset: {}\n" +
+                                    "Error: {}",
+                            record.topic(),
+                            record.offset(),
+                            exception.getMessage());
+                },
+                new FixedBackOff(0L, 0L)
         );
 
+        errorHandler.setCommitRecovered(true);
+        errorHandler.setSeekAfterError(false);
+        errorHandler.setAckAfterHandle(true);
+
+        errorHandler.addNotRetryableExceptions(
+                Exception.class
+        );
         factory.setCommonErrorHandler(errorHandler);
+
         return factory;
     }
 }
