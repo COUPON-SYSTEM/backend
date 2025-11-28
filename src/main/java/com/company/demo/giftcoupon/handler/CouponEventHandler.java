@@ -9,5 +9,5 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 public interface CouponEventHandler {
-    void handle(DomainEventEnvelope<CouponIssuedPayload> envelope) throws IOException, FirebaseMessagingException;
+    void handle(DomainEventEnvelope<?> envelope) throws IOException, FirebaseMessagingException;
 }

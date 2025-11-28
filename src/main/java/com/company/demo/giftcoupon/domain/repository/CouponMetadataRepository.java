@@ -8,6 +8,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface CouponMetadataRepository extends JpaRepository<CouponMetadata, Long> {
-    @Query("select c from CouponMetadata c where c.promotionId =: promotionId")
+    @Query("select c from CouponMetadata c where c.promotionId = :promotionId")
     Optional<CouponMetadata> findByPromotionId(@Param("promotionId") Long promotionId);
 }

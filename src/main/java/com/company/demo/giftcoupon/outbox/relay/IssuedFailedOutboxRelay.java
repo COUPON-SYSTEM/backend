@@ -66,7 +66,7 @@ public class IssuedFailedOutboxRelay {
         return true;
     }
 
-    @Scheduled(fixedDelay = 1000) // 1초 간격 등
+    @Scheduled(fixedDelay = 10000000) // 10초 간격 등
     public void relayMany() {
         int count = 0;
         while (count < MAX_RETRY_PER_RUN) {

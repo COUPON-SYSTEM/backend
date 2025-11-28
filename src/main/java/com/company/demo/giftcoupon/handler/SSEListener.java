@@ -5,6 +5,7 @@ import com.company.demo.common.constant.KafkaTopic;
 import com.company.demo.giftcoupon.domain.repository.SseEmitterRepository;
 import com.company.demo.giftcoupon.outbox.domain.event.CouponIssuedPayload;
 import com.company.demo.giftcoupon.outbox.domain.event.DomainEventEnvelope;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -20,6 +21,7 @@ import java.io.IOException;
 public class SSEListener implements CouponEventHandler {
 
     private final SseEmitterRepository sseEmitterRepository;
+    private final ObjectMapper objectMapper;
 
     @Override
     @KafkaListener(
@@ -27,18 +29,18 @@ public class SSEListener implements CouponEventHandler {
             groupId = GroupType.SSE,
             containerFactory = "couponIssueKafkaListenerContainerFactory"
     )
-    public void handle(@Payload DomainEventEnvelope<CouponIssuedPayload> envelope){
+    public void handle(@Payload DomainEventEnvelope<?> envelope){
         pushSSE(envelope);
     }
 
-    private void pushSSE(DomainEventEnvelope<CouponIssuedPayload> envelope) {
+    private void pushSSE(DomainEventEnvelope<?> envelope) {
 
-        if (envelope == null || envelope.payload() == null) {
-            log.warn("잘못된 Kafka 메시지 수신 - envelope 또는 payload가 null: {}", envelope);
-            return;
-        }
+        CouponIssuedPayload payload = objectMapper.convertValue(
+                envelope.payload(),
+                CouponIssuedPayload.class
+        );
 
-        CouponIssuedPayload payload = envelope.payload();
+        log.info("[SSE 핸들러]");
         Long userId = payload.userId();
         SseEmitter emitter = sseEmitterRepository.findById(userId);
 
