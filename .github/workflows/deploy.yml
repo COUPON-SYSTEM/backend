@@ -44,27 +44,28 @@ jobs:
           docker tag "$IMAGE:$TAG" "$IMAGE:latest"
           docker push "$IMAGE:latest"
 
-      # 5) EC2에 SSH로 들어가서 compose pull/up (배포)
-      - name: Deploy via SSH (docker compose)
+      # 5) EC2에 SSH로 들어가서 k3s 배포 (kubectl)
+      - name: Deploy via SSH (k3s kubectl)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}     # 보통 ubuntu
+          username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
+
             TAG=$(echo "${GITHUB_SHA}" | cut -c1-7)
             IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:$TAG"
-            
-            # (옵션) 노드에서 kubectl이 바로 먹는지 확인
+
+            # kubectl 동작 확인
             kubectl get nodes
-            
+
             # ✅ Deployment 이미지 교체 (롤링 업데이트)
-            kubectl set image deployment/coupon-service coupon-service=$IMAGE
-            
+            kubectl set image deployment/coupon-service coupon-service="$IMAGE"
+
             # ✅ 배포 완료까지 대기
             kubectl rollout status deployment/coupon-service
-            
+
             # ✅ 상태 확인
             kubectl get pods -l app=coupon-service -o wide
             kubectl get svc coupon-service

@@ -9,7 +9,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - /opt/coupon/.env:/app/.env:ro
+      - /opt/coupon-service/.env:/app/.env:ro
     environment:
       - JAVA_OPTS=-Dspring.config.import=optional:file:/app/.env
 
