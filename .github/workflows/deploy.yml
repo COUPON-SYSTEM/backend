@@ -53,19 +53,13 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
-
-            TAG=$(echo "${GITHUB_SHA}" | cut -c1-7)
+            
+            # ✅ FIX: EC2에서 ${GITHUB_SHA} 쓰지 말고, Actions에서 먼저 치환된 값을 사용
+            TAG=$(echo "${{ github.sha }}" | cut -c1-7)
             IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:$TAG"
-
-            # kubectl 동작 확인
+            
             kubectl get nodes
-
-            # ✅ Deployment 이미지 교체 (롤링 업데이트)
             kubectl set image deployment/coupon-service coupon-service="$IMAGE"
-
-            # ✅ 배포 완료까지 대기
-            kubectl rollout status deployment/coupon-service
-
-            # ✅ 상태 확인
+            kubectl rollout status deployment/myapp -n myns --timeout=120s
             kubectl get pods -l app=coupon-service -o wide
             kubectl get svc coupon-service
