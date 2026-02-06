@@ -12,9 +12,9 @@ spring:
       port: ${REDIS_PORT}
 
   kafka:
-    bootstrap-servers: my-kafka-kafka-bootstrap:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER}
     consumer:
-      group-id: consumer-group1
+      group-id: ${KAFKA_CONSUMER_GROUP_ID}
       auto-offset-reset: earliest
 
   batch:

@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  coupon-service:
+    image: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest
+    container_name: coupon-service
+    restart: always
+
+    ports:
+      - "8080:8080"
+    volumes:
+      - /opt/coupon/.env:/app/.env:ro
+    environment:
+      - JAVA_OPTS=-Dspring.config.import=optional:file:/app/.env
+
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"

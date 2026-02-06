@@ -35,8 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
-**/docker-compose.yml
-*.yaml
 .DS_Store
 .data/
 

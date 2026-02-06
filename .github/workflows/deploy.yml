@@ -4,9 +4,6 @@ on:
   push:
     branches: ["main"]
 
-env:
-  IMAGE_NAME: coupon-service
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -39,13 +36,13 @@ jobs:
       - name: Build & Push
         run: |
           TAG=$(echo "${GITHUB_SHA}" | cut -c1-7)
-          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+          IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}"
 
-          docker build -t $IMAGE:$TAG .
-          docker push $IMAGE:$TAG
+          docker build -t "$IMAGE:$TAG" .
+          docker push "$IMAGE:$TAG"
 
-          docker tag $IMAGE:$TAG $IMAGE:latest
-          docker push $IMAGE:latest
+          docker tag "$IMAGE:$TAG" "$IMAGE:latest"
+          docker push "$IMAGE:latest"
 
       # 5) EC2에 SSH로 들어가서 compose pull/up (배포)
       - name: Deploy via SSH (docker compose)
@@ -56,15 +53,18 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -e
-
-            cd /opt/coupon
-
-            # ✅ 최신 이미지 pull
-            docker compose pull
-
-            # ✅ 컨테이너 재기동(무중단에 가까운 재시작은 별도 전략 필요)
-            docker compose up -d
-
+            TAG=$(echo "${GITHUB_SHA}" | cut -c1-7)
+            IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:$TAG"
+            
+            # (옵션) 노드에서 kubectl이 바로 먹는지 확인
+            kubectl get nodes
+            
+            # ✅ Deployment 이미지 교체 (롤링 업데이트)
+            kubectl set image deployment/coupon-service coupon-service=$IMAGE
+            
+            # ✅ 배포 완료까지 대기
+            kubectl rollout status deployment/coupon-service
+            
             # ✅ 상태 확인
-            docker compose ps
-            docker logs --tail=50 coupon-service
+            kubectl get pods -l app=coupon-service -o wide
+            kubectl get svc coupon-service
