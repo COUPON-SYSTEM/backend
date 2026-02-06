@@ -9,13 +9,15 @@ import java.time.LocalDateTime;
 public record CouponIssuedPayload(
         Long userId,
         Long couponId,
-        LocalDateTime issuedAt
+        LocalDateTime issuedAt,
+        Long promotionId
 ) {
-    public static CouponIssuedPayload of(Long userId, Long couponId, LocalDateTime issuedAt) {
+    public static CouponIssuedPayload of(Long userId, Long couponId, LocalDateTime issuedAt, Long promotionId) {
         return CouponIssuedPayload.builder()
                 .userId(userId)
                 .couponId(couponId)
                 .issuedAt(issuedAt)
+                .promotionId(promotionId)
                 .build();
     }
 }

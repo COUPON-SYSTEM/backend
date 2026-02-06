@@ -39,6 +39,7 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.LINGER_MS_CONFIG, 1);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, true);
         return props;
     }
 
@@ -63,6 +64,17 @@ public class KafkaProducerConfig {
     @Bean
     public KafkaTemplate<String, DomainEventEnvelope<CouponIssuedPayload>> issuedKafkaTemplate() {
         return new KafkaTemplate<>(couponIssuedProducerFactory());
+    }
+
+    @Bean
+    public ProducerFactory<String, DomainEventEnvelope<?>> dltProducerFactory() {
+        Map<String, Object> props = baseProducerConfigs();
+        return new DefaultKafkaProducerFactory<>(props);
+    }
+
+    @Bean
+    public KafkaTemplate<String, DomainEventEnvelope<?>> dltKafkaTemplate() {
+        return new KafkaTemplate<>(dltProducerFactory());
     }
 
     // 2. String 타입을 위한 ProducerFactory (JSON 직렬화가 필요 없으므로 StringSerializer 사용 가능)

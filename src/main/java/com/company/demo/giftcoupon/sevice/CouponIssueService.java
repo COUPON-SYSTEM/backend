@@ -12,15 +12,10 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class CouponIssueService {
-    private final UserRepository userRepository;
-
-    public Coupon issueCoupon(final String userId) {
-//        if(!userRepository.existsById(Long.valueOf(userId))){
-//            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
-//        }
-
+    public Coupon issueCoupon(final String userId, final String couponId) {
         return Coupon.builder()
                 .userId(Long.valueOf(userId))
+                .promotionId(Long.valueOf(couponId))
                 .code("안녕하세요")
                 .eventType(EventType.ISSUED_EVENT)
                 .build();

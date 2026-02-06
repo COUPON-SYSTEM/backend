@@ -19,8 +19,11 @@ public class History {
     @Column(name = "history_id", nullable = false)
     private Long id;
 
-    @Column(name = "event_id", nullable = false)
-    private Long eventId;
+    @Column(name = "promotion_id", nullable = false)
+    private Long promotionId;
+
+    @Column(name = "coupon_id", nullable = false)
+    private Long couponId;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
@@ -28,8 +31,9 @@ public class History {
     @Column(name = "issuedAt", nullable = true)
     private LocalDateTime issuedAt;
 
-    public History(Long eventId, Long userId, LocalDateTime issuedAt) {
-        this.eventId = eventId;
+    public History(Long promotionId, Long couponId, Long userId, LocalDateTime issuedAt) {
+        this.promotionId = promotionId;
+        this.couponId = couponId;
         this.userId = userId;
         this.issuedAt = issuedAt;
     }

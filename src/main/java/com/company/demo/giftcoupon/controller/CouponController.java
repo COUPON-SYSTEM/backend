@@ -23,7 +23,7 @@ public class CouponController {
     @PostMapping("/request")
     public ApiResponse<String> requestCoupon(@RequestBody CouponIssueRequest request) {
         // "coupon:queue" 리스트에 userId를 넣되, 100명 이상이면 실패
-        couponRequestRedisQueue.tryPush(String.valueOf(request.getUserId()));
+        couponRequestRedisQueue.tryPush(String.valueOf(request.getUserId()), String.valueOf(request.getPromotionId()));
         return ApiResponse.success("신청 완료");
     }
 }

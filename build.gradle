@@ -59,6 +59,8 @@ dependencies {
 	// RabbitMQ와 AMQP를 위한 의존성 추가
 	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
+	// Firebase Admin SDK 추가 (FCM 발송 등 서버 기능용)
+	implementation 'com.google.firebase:firebase-admin:9.2.0'
 }
 
 tasks.named('test') {

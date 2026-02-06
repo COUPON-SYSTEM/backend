@@ -37,6 +37,7 @@ out/
 .vscode/
 .DS_Store
 .data/
+src/main/resources/serviceAccountKey.json
 
 ### ENV File ###
 *.env
