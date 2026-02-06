@@ -60,6 +60,6 @@ jobs:
             
             kubectl get nodes
             kubectl set image deployment/coupon-service coupon-service="$IMAGE"
-            kubectl rollout status deployment/myapp -n myns --timeout=120s
+            kubectl rollout status deployment/coupon-service --timeout=120s
             kubectl get pods -l app=coupon-service -o wide
             kubectl get svc coupon-service
