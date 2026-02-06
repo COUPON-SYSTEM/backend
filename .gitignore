@@ -35,10 +35,9 @@ out/
 
 ### VS Code ###
 .vscode/
-**/application.yml
-src/main/resources/application.yml
-*.yml
-*.yaml
 .DS_Store
 .data/
 src/main/resources/serviceAccountKey.json
+
+### ENV File ###
+*.env

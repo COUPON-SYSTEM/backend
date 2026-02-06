@@ -1,0 +1,65 @@
+name: Deploy coupon-service (Docker Compose on EC2)
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) 소스 가져오기
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2) (선택) 자바/그레이들 빌드
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Build (Gradle)
+        run: |
+          chmod +x gradlew
+          ./gradlew clean build -x test
+
+      # 3) 도커허브 로그인 (Secrets 필요)
+      - name: Login Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 4) 이미지 빌드 & 푸시 (태그는 커밋 해시 7자리 + latest)
+      - name: Build & Push
+        run: |
+          TAG=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}"
+
+          docker build -t "$IMAGE:$TAG" .
+          docker push "$IMAGE:$TAG"
+
+          docker tag "$IMAGE:$TAG" "$IMAGE:latest"
+          docker push "$IMAGE:latest"
+
+      # 5) EC2에 SSH로 들어가서 k3s 배포 (kubectl)
+      - name: Deploy via SSH (k3s kubectl)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            
+            # ✅ FIX: EC2에서 ${GITHUB_SHA} 쓰지 말고, Actions에서 먼저 치환된 값을 사용
+            TAG=$(echo "${{ github.sha }}" | cut -c1-7)
+            IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:$TAG"
+            
+            kubectl get nodes
+            kubectl set image deployment/coupon-service coupon-service="$IMAGE"
+            kubectl rollout status deployment/coupon-service --timeout=120s
+            kubectl get pods -l app=coupon-service -o wide
+            kubectl get svc coupon-service
