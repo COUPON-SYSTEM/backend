@@ -54,5 +54,4 @@ management:
 
 firebase:
   sdk:
-    path: serviceAccountKey.json
-
+    path: ${GOOGLE_APPLICATION_CREDENTIALS:serviceAccountKey.json}
