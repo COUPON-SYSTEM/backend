@@ -35,6 +35,8 @@ spring:
         highlight_sql: true
 
   mail:
+    admin:
+      email: dobonglife.server@gmail.com
     host: smtp.gmail.com
     port: 587
     username: ${MAIL_USERNAME}
