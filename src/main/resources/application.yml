@@ -50,3 +50,7 @@ management:
       exposure:
         include: "*"
 
+firebase:
+  sdk:
+    path: serviceAccountKey.json
+
