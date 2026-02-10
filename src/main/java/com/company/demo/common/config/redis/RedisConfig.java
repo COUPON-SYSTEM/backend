@@ -17,47 +17,47 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Slf4j
 public class RedisConfig {
 
-    @Value("${spring.data.redis.host}")
-    private String host;
+    // 클러스터면 host/port가 아니라 nodes를 찍어야 함
+    @Value("${spring.data.redis.cluster.nodes}")
+    private String clusterNodes;
 
-    @Value("${spring.data.redis.port}")
-    private int port;
+    @Value("${spring.data.redis.ssl.enabled:false}")
+    private boolean sslEnabled;
 
     @PostConstruct
     public void init() {
-        log.info("Redis Host: {}", host);
-        log.info("Redis Port: {}", port);
+        log.info("Redis Cluster Nodes: {}", clusterNodes);
+        log.info("Redis SSL Enabled: {}", sslEnabled);
     }
 
-    // serializer 설정으로 redis-cli를 통해 직접 데이터를 조회할 수 있도록 설정
+    // redis-cli로 사람이 읽을 수 있게: String <-> String
     @Bean("customStringRedisTemplate")
     @Primary
     public RedisTemplate<String, String> stringTemplate(RedisConnectionFactory cf) {
         RedisTemplate<String, String> t = new RedisTemplate<>();
         t.setConnectionFactory(cf);
+
         StringRedisSerializer s = new StringRedisSerializer();
         t.setKeySerializer(s);
         t.setValueSerializer(s);
         t.setHashKeySerializer(s);
         t.setHashValueSerializer(s);
+
         t.afterPropertiesSet();
         return t;
     }
 
+    // Object는 JSON으로 저장: redis-cli에서도 JSON 문자열로 확인 가능
     @Bean("objectRedisTemplate")
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory cf) {
         RedisTemplate<String, Object> t = new RedisTemplate<>();
         t.setConnectionFactory(cf);
 
         StringRedisSerializer stringSerializer = new StringRedisSerializer();
-        // Object 저장을 위해 Jackson 기반 Serializer 사용
         GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer();
 
-        // 키는 String으로 유지
         t.setKeySerializer(stringSerializer);
         t.setHashKeySerializer(stringSerializer);
-
-        // 값은 JSON/Object 직렬화 사용
         t.setValueSerializer(jsonSerializer);
         t.setHashValueSerializer(jsonSerializer);
 
