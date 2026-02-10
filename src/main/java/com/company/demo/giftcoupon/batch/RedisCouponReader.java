@@ -1,10 +1,14 @@
 package com.company.demo.giftcoupon.batch;
 
 import com.company.demo.common.constant.RedisKey;
+import com.company.demo.common.response.error.ErrorCode;
+import com.company.demo.giftcoupon.batch.exception.RetryInfraException;
+import com.company.demo.giftcoupon.batch.exception.SkipDataException;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
@@ -47,30 +51,38 @@ public class RedisCouponReader implements ItemReader<CouponIssueInput> {
      */
     @Override
     public CouponIssueInput read() {
-        if (cursor >= buffer.size()) {
-            buffer.clear();
-            cursor = 0;
+        try {
+            if (cursor >= buffer.size()) {
+                buffer.clear();
+                cursor = 0;
 
-            List<String> result = (List<String>) redisTemplate.execute(
-                    luaPopScript,
-                    Collections.singletonList(RedisKey.COUPON_REQUEST_QUEUE_KEY),
-                    String.valueOf(BATCH_SIZE)
-            );
+                List<String> result = (List<String>) redisTemplate.execute(
+                        luaPopScript,
+                        Collections.singletonList(RedisKey.COUPON_REQUEST_QUEUE_KEY),
+                        String.valueOf(BATCH_SIZE)
+                );
 
-            if (result != null) {
-                buffer.addAll(result);
+                if (result != null) {
+                    buffer.addAll(result);
+                }
+
+                if (buffer.isEmpty()) return null;
             }
 
-            if (buffer.isEmpty()) {
-                return null;
+            String raw = buffer.get(cursor++); // "userId:promotionId"
+            String[] parts = raw.split(":");
+            if (parts.length != 2) {
+                throw new SkipDataException(ErrorCode.INVALID_FORMAT);
             }
+
+            return new CouponIssueInput(parts[0], parts[1]);
+
+        } catch (SkipDataException e) {
+            throw e;
+        } catch (RedisConnectionFailureException e) {
+            throw new RetryInfraException(ErrorCode.REDIS_CONNECTION_FAILED);
+        } catch (Exception e) {
+            throw new RetryInfraException(ErrorCode.COUPON_REDIS_FAILED);
         }
-
-        String raw = buffer.get(cursor++); // "userId:promotionId"
-        String[] parts = raw.split(":");
-        String userId = parts[0];
-        String promotionId = parts[1];
-
-        return new CouponIssueInput(userId, promotionId);
     }
 }

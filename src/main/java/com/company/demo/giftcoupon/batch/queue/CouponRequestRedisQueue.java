@@ -1,4 +1,4 @@
-package com.company.demo.giftcoupon.config.queue;
+package com.company.demo.giftcoupon.batch.queue;
 
 import com.company.demo.common.constant.RedisKey;
 import com.company.demo.common.response.error.ErrorCode;
