@@ -1,6 +1,8 @@
 package com.company.demo.common.config.batch;
 
 import com.company.demo.giftcoupon.batch.*;
+import com.company.demo.giftcoupon.batch.exception.RetryInfraException;
+import com.company.demo.giftcoupon.batch.exception.SkipDataException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -35,8 +37,16 @@ public class CouponRequestJobConfig {
                 .processor(couponIssueProcessor)
                 .writer(couponIssuedWriter)
                 .faultTolerant()
-                .skip(Exception.class)
+
+                // 인프라성 예외는 retry
+                .retry(RetryInfraException.class)
+                .retryLimit(3)
+                .noRetry(SkipDataException.class)
+
+                // 데이터성 예외만 skip
+                .skip(SkipDataException.class)
                 .skipLimit(10)
+
                 .build();
     }
 }
