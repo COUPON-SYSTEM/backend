@@ -1,6 +1,7 @@
 package com.company.demo.common.config.batch;
 
 import com.company.demo.giftcoupon.batch.*;
+import com.company.demo.giftcoupon.batch.exception.CouponSkipListener;
 import com.company.demo.giftcoupon.batch.exception.RetryInfraException;
 import com.company.demo.giftcoupon.batch.exception.SkipDataException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class CouponRequestJobConfig {
     private final CouponIssuedWriter couponIssuedWriter;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
+    private final CouponSkipListener couponSkipListener;
 
     @Bean
     public Job couponIssueJob() {
@@ -46,6 +48,7 @@ public class CouponRequestJobConfig {
                 // 데이터성 예외만 skip
                 .skip(SkipDataException.class)
                 .skipLimit(10)
+                .listener(couponSkipListener)
 
                 .build();
     }
