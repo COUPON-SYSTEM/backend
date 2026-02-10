@@ -49,6 +49,7 @@ public class CouponRequestJobConfig {
                 .skip(SkipDataException.class)
                 .skipLimit(10)
                 .listener(couponSkipListener)
+                .noRollback(SkipDataException.class)
 
                 .build();
     }
