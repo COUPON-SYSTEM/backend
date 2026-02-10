@@ -11,8 +11,13 @@ spring:
       cluster:
         nodes: ${REDIS_NODES}
       ssl:
-        enabled: true
+        enabled: false
       timeout: 3s
+      lettuce:
+        cluster:
+          refresh:
+            adaptive: true
+            period: 30s
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER}
