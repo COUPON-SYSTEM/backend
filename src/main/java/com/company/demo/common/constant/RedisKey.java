@@ -2,7 +2,7 @@ package com.company.demo.common.constant;
 
 public final class RedisKey {
 
-    private static final String COUPON_TAG = "{coupon}";
+    private static final String COUPON_TAG = "coupon";
 
     public static final String COUPON_REQUEST_QUEUE_KEY =
             COUPON_TAG + ":request:queue";
