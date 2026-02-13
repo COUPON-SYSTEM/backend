@@ -47,7 +47,8 @@ public class CouponRequestJobConfig {
 
                 // 데이터성 예외만 skip
                 .skip(SkipDataException.class)
-                .skipLimit(10)
+                .skip(RetryInfraException.class)
+                .skipLimit(30)
                 .listener(couponSkipListener)
                 .noRollback(SkipDataException.class)
 

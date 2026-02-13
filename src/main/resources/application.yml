@@ -8,16 +8,10 @@ spring:
 
   data:
     redis:
-      cluster:
-        nodes: ${REDIS_NODES}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
       ssl:
-        enabled: false
-      timeout: 3s
-      lettuce:
-        cluster:
-          refresh:
-            adaptive: true
-            period: 30s
+        enabled: true
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER}
