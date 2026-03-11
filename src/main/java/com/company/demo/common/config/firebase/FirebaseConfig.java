@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
@@ -20,7 +21,9 @@ public class FirebaseConfig {
     @Bean
     public FirebaseApp firebaseApp() throws IOException {
         // 서비스 계정 키 파일 로드
-        Resource resource = new ClassPathResource(serviceAccountKeyPath);
+        Resource resource = isAbsolutePath(serviceAccountKeyPath)
+                ? new FileSystemResource(serviceAccountKeyPath)
+                : new ClassPathResource(serviceAccountKeyPath);
 
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(resource.getInputStream()))
@@ -38,5 +41,10 @@ public class FirebaseConfig {
     public FirebaseMessaging firebaseMessaging(FirebaseApp firebaseApp) {
         // 푸시 알림 발송을 위한 FirebaseMessaging 인스턴스 빈으로 등록
         return FirebaseMessaging.getInstance(firebaseApp);
+    }
+
+    private boolean isAbsolutePath(String path) {
+        // Linux 절대경로(/...), Windows 절대경로(C:\...) 둘 다 대응
+        return path != null && (path.startsWith("/") || path.matches("^[A-Za-z]:\\\\.*"));
     }
 }

@@ -15,6 +15,9 @@
 
 ---
 
+### 아키텍쳐
+<img width="3151" height="1651" alt="도봉라이트_msa구조 drawio" src="https://github.com/user-attachments/assets/ad17278d-fff6-44ca-946d-c7f5b9b2ca98" />
+
 ## 프로젝트 소개
 
 프로모션 이벤트에서 선착순으로 쿠폰을 발급하는 시스템입니다. Redis 기반 대기열과 Spring Batch를 활용한 청크 단위 처리, Kafka를 통한 이벤트 기반 아키텍처로 높은 동시성 환경에서도 안정적인 쿠폰 발급을 보장합니다.

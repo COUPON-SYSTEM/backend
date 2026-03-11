@@ -25,8 +25,6 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String BOOTSTRAP_SERVERS;
 
-    private static final String SCHEMA_REGISTRY_URL = "http://localhost:8081";
-
     @PostConstruct
     public void checkBootstrapServers() {
         log.info("BOOTSTRAP_SERVERS from config: {}", BOOTSTRAP_SERVERS);

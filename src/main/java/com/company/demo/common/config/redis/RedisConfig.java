@@ -8,10 +8,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.time.Duration;
 
 @Configuration
 @Slf4j
@@ -20,11 +23,8 @@ public class RedisConfig {
     @Value("${spring.data.redis.host}")
     private String host;
 
-    @Value("${spring.data.redis.port}")
+    @Value("${spring.data.redis.port:6379}")
     private int port;
-
-    @Value("${spring.data.redis.database:0}")
-    private int redisDatabase;
 
     @PostConstruct
     public void init() {
@@ -32,48 +32,45 @@ public class RedisConfig {
         log.info("Redis Port: {}", port);
     }
 
-    // RedisProperties로 yaml에 저장한 host, post를 연결
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        // 1. Redis 연결 설정을 위한 객체를 생성합니다.
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
 
-        // 2. @Value로 가져온 database 번호를 설정합니다. (이 부분이 핵심 수정 사항)
-        config.setDatabase(redisDatabase);
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                .useSsl()
+                .build();
 
-        // 3. 설정된 정보를 바탕으로 LettuceConnectionFactory를 생성하여 반환합니다.
-        return new LettuceConnectionFactory(config);
+        return new LettuceConnectionFactory(config, clientConfig);
     }
 
-    // serializer 설정으로 redis-cli를 통해 직접 데이터를 조회할 수 있도록 설정
+    // redis-cli로 사람이 읽을 수 있게: String <-> String
     @Bean("customStringRedisTemplate")
     @Primary
     public RedisTemplate<String, String> stringTemplate(RedisConnectionFactory cf) {
         RedisTemplate<String, String> t = new RedisTemplate<>();
         t.setConnectionFactory(cf);
+
         StringRedisSerializer s = new StringRedisSerializer();
         t.setKeySerializer(s);
         t.setValueSerializer(s);
         t.setHashKeySerializer(s);
         t.setHashValueSerializer(s);
+
         t.afterPropertiesSet();
         return t;
     }
 
+    // Object는 JSON으로 저장: redis-cli에서도 JSON 문자열로 확인 가능
     @Bean("objectRedisTemplate")
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory cf) {
         RedisTemplate<String, Object> t = new RedisTemplate<>();
         t.setConnectionFactory(cf);
 
         StringRedisSerializer stringSerializer = new StringRedisSerializer();
-        // Object 저장을 위해 Jackson 기반 Serializer 사용
         GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer();
 
-        // 키는 String으로 유지
         t.setKeySerializer(stringSerializer);
         t.setHashKeySerializer(stringSerializer);
-
-        // 값은 JSON/Object 직렬화 사용
         t.setValueSerializer(jsonSerializer);
         t.setHashValueSerializer(jsonSerializer);
 
